@@ -1,0 +1,22 @@
+library(rvest)
+#library(selectr)
+
+###
+#movie example
+
+url <- 'http://www.imdb.com/search/title?count=100&release_date=2016,2016&title_type=feature'
+webpage <- read_html(url)
+rank_data_html <- html_nodes(webpage, '.text-primary')
+rank_data <- html_text(rank_data_html)
+rank_data <- as.numeric(rank_data)
+
+title_data_html <- html_nodes(webpage, ".lister-item-header a")
+title_data <- html_text(title_data_html)
+
+#olympics odds
+my_url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
+my_webpage <- read_html(my_url)
+
+slalom_m_html <- html_nodes(my_webpage, 'td')
+slalom_m <- html_text(slalom_m_html)
+slalom_m <- as.data.frame(slalom_m)
