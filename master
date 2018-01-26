@@ -1,0 +1,101 @@
+library(rvest)
+library(dplyr)
+library(tidyr)
+#library(selectr)
+
+###
+#movie example
+
+# url <- 'http://www.imdb.com/search/title?count=100&release_date=2016,2016&title_type=feature'
+# webpage <- read_html(url)
+# rank_data_html <- html_nodes(webpage, '.text-primary')
+# rank_data <- html_text(rank_data_html)
+# rank_data <- as.numeric(rank_data)
+# 
+# title_data_html <- html_nodes(webpage, ".lister-item-header a")
+# title_data <- html_text(title_data_html)
+
+#olympics odds
+my_url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
+my_webpage <- read_html(my_url)
+
+slalom_m_headers_html <- html_nodes(my_webpage, 'th')
+slalom_m_headers <- html_text(slalom_m_headers_html)
+slalom_m_headers <- data.frame(matrix(unlist(slalom_m_headers), nrow = 1))
+
+#names
+slalom_m_names_html <- html_nodes(my_webpage, '#mainplh_boAutoOddsTable1_GridView1 td:nth-child(1)')
+slalom_m_names <- html_text(slalom_m_names_html)
+slalom_m_names <- as.data.frame(slalom_m_names)
+
+#odds hi lo
+slalom_m_hilo_html <- html_nodes(my_webpage, '#mainplh_boAutoOddsTable1_GridView1 td+ td')
+slalom_m_hilo <- html_text(slalom_m_hilo_html)
+slalom_m_hilo <- data.frame(matrix(unlist(slalom_m_hilo), ncol = 2, byrow = TRUE))
+
+#odds sites
+slalom_m_odds_html <- html_nodes(my_webpage, '#mainplh_boAutoOddsTable1_GridView2 td')
+slalom_m_odds <- html_text(slalom_m_odds_html)
+slalom_m_odds <- data.frame(matrix(unlist(slalom_m_odds), ncol = 3, byrow = TRUE))
+
+slalom_m <- slalom_m_names %>%
+  union(slalom_m_hilo)
+
+slalom_m <- merge(slalom_m_names, slalom_m_odds)
+slalom_m <- bind_cols(slalom_m_names, slalom_m_hilo)
+slalom_m <- slalom_m_names %>%
+  bind_cols(slalom_m_hilo) %>%
+  bind_cols(slalom_m_odds) %>%
+  head(-1)
+# 
+# #
+# slalom_m_name41_html <- html_nodes(my_webpage, '#mainplh_boAutoOddsTable1_GridView1_name_41')
+# slalom_m_name41 <- html_text(slalom_m_name41_html)
+# 
+# slalom_m_paf41_html <- html_nodes(my_webpage, '#mainplh_boAutoOddsTable1_GridView2_Paf_DEC_41')
+# slalom_m_paf41 <- html_text(slalom_m_paf41_html)
+# slalom_m_paf41 <- as.numeric(slalom_m_paf41)
+# 
+# slalom_m_name_html <- html_nodes(my_webpage , '#mainplh_boAutoOddsTable1_GridView1_name_`i`')
+# 
+# ##### #####
+# slalom_new <- html_nodes(my_webpage, '.autooddstable_alternate_row td')  #this works!?
+# slalom_new2 <- html_text(slalom_new)
+# slalom_new2 <- as.data.frame(slalom_new2)
+# 
+# slalom_m_headers_html <- html_nodes(my_webpage, 'tr th')
+# slalom_m_headers <- html_text(slalom_m_headers_html)
+# #slalom_m <- as.data.frame(slalom_m)
+# 
+# # slalom_m_values_html <- html_nodes(my_webpage, 'td')
+# # slalom_m_values <- html_text(slalom_m_values_html)
+# 
+# slalom_m_values_html <- html_nodes(my_webpage, 'td a')
+# slalom_m_values <- html_text(slalom_m_values_html)
+# df <- data.frame(matrix(unlist(as.list(slalom_m_values)), ncol = 6))
+# df <- data.frame(matrix(unlist(slalom_m_values), ncol = 6))
+# slalom_m_values <- as.data.frame(slalom_m_values)
+# 
+# slalom_m_values_html <- html_nodes(my_webpage, 'tr td')
+# slalom_m_values <- html_text(slalom_m_values_html)
+# df <- data.frame(matrix(unlist(as.list(slalom_m_values)), ncol = 6))
+# 
+# slalom_m_values_html <- html_nodes(my_webpage, 'td')
+# slalom_m_values <- html_text(slalom_m_values_html)
+# slalom_m_values <- as.numeric(slalom_m_values)
+# df <- data.frame(matrix(unlist(as.list(slalom_m_values)), ncol = 6))
+# 
+# #ncol0 <- function(x) dim(x)[2]
+# # slalom_m_values <- as.data.frame(slalom_m_values, col.names = c("a", "b", "c", "d", "e", "f"))
+# # slalom_m_values <- as.data.frame.table(slalom_m_values)
+# # #slalom_m_values <- tibble(slalom_m_values, ncol = 6)
+
+#odds checker
+my_url <- 'https://www.oddschecker.com/winter-sports/biathlon/biathlon-mens-world-cup-overall/winner'
+my_webpage <- read_html(my_url)
+
+bi_m_html <- html_nodes(my_webpage, 'p')
+bi_m_vals <- html_text(bi_m_html)
+bi_m_vals <- as.numeric(bi_m_vals)
+tail(bi_m_vals, 50)
+head(bi_m_vals, 50)
