@@ -67,13 +67,23 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
   event_df
 }
 
-url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
-slalom_m <- nicerodds_scraper(url)
-url <- 'http://www.nicerodds.co.uk/olympics-mens-giant-slalom'
-giant_slalom_m <- nicerodds_scraper(url)
-url <- 'http://www.nicerodds.co.uk/olympics-mens-downhill'
-downhill_m <- nicerodds_scraper(url)
+# url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
+# slalom_m <- nicerodds_scraper(url)
+# url <- 'http://www.nicerodds.co.uk/olympics-mens-giant-slalom'
+# giant_slalom_m <- nicerodds_scraper(url)
+# url <- 'http://www.nicerodds.co.uk/olympics-mens-downhill'
+# downhill_m <- nicerodds_scraper(url)
+# 
+# all_events <- slalom_m %>%
+#   bind_rows(giant_slalom_m) %>%
+#   bind_rows(downhill_m)
 
-all_events <- slalom_m %>%
-  bind_rows(giant_slalom_m) %>%
-  bind_rows(downhill_m)
+urls <- as.list(c('http://www.nicerodds.co.uk/olympics-mens-slalom',
+          'http://www.nicerodds.co.uk/olympics-mens-giant-slalom',
+          'http://www.nicerodds.co.uk/olympics-mens-downhill'
+          ))
+
+
+all_events_new <- lapply(urls, nicerodds_scraper)
+all_events_new <- do.call(bind_rows, all_events_new)
+
