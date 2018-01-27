@@ -69,8 +69,8 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
   event_df
 }
 
-url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
-slalom_m <- nicerodds_scraper(url)
+# url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
+# slalom_m <- nicerodds_scraper(url)
 # url <- 'http://www.nicerodds.co.uk/olympics-mens-giant-slalom'
 # giant_slalom_m <- nicerodds_scraper(url)
 # url <- 'http://www.nicerodds.co.uk/olympics-mens-downhill'
@@ -96,7 +96,3 @@ urls <- as.list(c('http://www.nicerodds.co.uk/olympics-mens-slalom',
 alpine <- lapply(urls, nicerodds_scraper)
 alpine <- do.call(bind_rows, alpine)
 alpine$sport <- "alpine"
-
-copy <- alpine
-copy[,"Highestodds"] <- as.numeric(copy[,"Highestodds"])
-
