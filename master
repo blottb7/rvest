@@ -96,3 +96,23 @@ urls <- as.list(c('http://www.nicerodds.co.uk/olympics-mens-slalom',
 alpine <- lapply(urls, nicerodds_scraper)
 alpine <- do.call(bind_rows, alpine)
 alpine$sport <- "alpine"
+
+urls <- as.list(c('http://www.nicerodds.co.uk/olympics-biathlon-men-10-km-sprint',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-men-10-km-sprint',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-men-15-km-mass-start',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-men-20-km-individual',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-men-relay',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-women-7-5-km-sprint',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-women-10-km-pursuit',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-women-12-5-km-mass-start',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-women-15-km-individual',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-women-relay',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-mixed-relay')
+                )
+
+biathlon <- lapply(urls, nicerodds_scraper)
+biathlon <- do.call(bind_rows, biathlon)
+biathlon$sport <- "biathlon"
+
+all_events <- alpine %>%
+  bind_rows(biathlon)
