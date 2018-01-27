@@ -80,10 +80,18 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
 
 urls <- as.list(c('http://www.nicerodds.co.uk/olympics-mens-slalom',
           'http://www.nicerodds.co.uk/olympics-mens-giant-slalom',
-          'http://www.nicerodds.co.uk/olympics-mens-downhill'
-          ))
+          'http://www.nicerodds.co.uk/olympics-mens-downhill',
+          'http://www.nicerodds.co.uk/olympics-mens-combined',
+          'http://www.nicerodds.co.uk/olympics-mens-super-g',
+          'http://www.nicerodds.co.uk/olympics-alpine-team-event',
+          'http://www.nicerodds.co.uk/olympics-womens-slalom',
+          'http://www.nicerodds.co.uk/olympics-womens-giant-slalom',
+          'http://www.nicerodds.co.uk/olympics-womens-downhill',
+          'http://www.nicerodds.co.uk/olympics-womens-combined',
+          'http://www.nicerodds.co.uk/olympics-womens-super-g')
+          )
 
-
-all_events_new <- lapply(urls, nicerodds_scraper)
-all_events_new <- do.call(bind_rows, all_events_new)
+alpine <- lapply(urls, nicerodds_scraper)
+alpine <- do.call(bind_rows, alpine)
+alpine$sport <- "alpine"
 
