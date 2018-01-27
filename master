@@ -1,3 +1,12 @@
+library(rvest)
+library(dplyr)
+library(tidyr)
+library(stringr)
+#library(selectr)
+
+#global vars
+hilo_cols <- 2
+
 nicerodds_scraper <- function(url, hilo_cols = 2) {
   
   #read in and save url
@@ -57,3 +66,14 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
   #return event df
   event_df
 }
+
+url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
+slalom_m <- nicerodds_scraper(url)
+url <- 'http://www.nicerodds.co.uk/olympics-mens-giant-slalom'
+giant_slalom_m <- nicerodds_scraper(url)
+url <- 'http://www.nicerodds.co.uk/olympics-mens-downhill'
+downhill_m <- nicerodds_scraper(url)
+
+all_events <- slalom_m %>%
+  bind_rows(giant_slalom_m) %>%
+  bind_rows(downhill_m)
