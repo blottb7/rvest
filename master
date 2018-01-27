@@ -1,100 +1,59 @@
-library(rvest)
-library(dplyr)
-library(tidyr)
-library(stringr)
-#library(selectr)
-
-#global vars
-hilo_cols <- 2
-
-#olympics odds
-
-#men's slalom
-url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'  #set url
-webpage <- read_html(url)  #read in and save url
-
-#headers
-slalom_m_headers <- html_nodes(webpage, 'th')  #read in 'headers' node
-slalom_m_headers <- html_text(slalom_m_headers)  #extract
-slalom_m_headers <- data.frame(matrix(unlist(slalom_m_headers), nrow = 1), stringsAsFactors = FALSE)  #convert to df
-
-names(slalom_m_headers) <- slalom_m_headers[1,]  #set row 1 as column names
-colnames(slalom_m_headers)[1] <- "name"  #rename first column to team/athlete name
-columns <- ncol(slalom_m_headers)  #save number of columns
-
-#names
-slalom_m_names <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView1 td:nth-child(1)')
-slalom_m_names <- html_text(slalom_m_names)
-slalom_m_names <- as.data.frame(slalom_m_names)
-
-slalom_m_names[,1] <- gsub("\\(.*","", slalom_m_names[,1])  #remove country abbreviations and parenthesis from name col
-slalom_m_names[,1] <- sub("\\s+$", "", slalom_m_names[,1])  #remove trailing white space
-
-#odds hi lo
-slalom_m_hilo <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView1 td+ td')
-slalom_m_hilo <- html_text(slalom_m_hilo)
-slalom_m_hilo <- data.frame(matrix(unlist(slalom_m_hilo), ncol = hilo_cols, byrow = TRUE))
-
-#odds sites
-slalom_m_odds <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView2 td')
-slalom_m_odds <- html_text(slalom_m_odds)
-slalom_m_odds <- data.frame(matrix(unlist(slalom_m_odds), ncol = columns - 3, byrow = TRUE))
-
-#bind columns
-slalom_m <- slalom_m_names %>%
-  bind_cols(slalom_m_hilo) %>%
-  bind_cols(slalom_m_odds) %>%
-  head(-1)
-
-#will need to do something with duplicate names similar to what I did with baseball
-
-#name cols
-names(slalom_m) <- names(slalom_m_headers)  #convert to headers df names
-
-#remove unwanted df's
-rm(slalom_m_hilo, slalom_m_names, slalom_m_odds, slalom_m_headers)
-
-#Men's Giant Slalom
-url <- 'http://www.nicerodds.co.uk/olympics-mens-giant-slalom'
-webpage <- read_html(url)
-
-#headers
-gslalom_m_headers <- html_nodes(webpage, 'th')
-gslalom_m_headers <- html_text(gslalom_m_headers)
-gslalom_m_headers <- data.frame(matrix(unlist(gslalom_m_headers), nrow = 1), stringsAsFactors = FALSE)
-
-names(gslalom_m_headers) <- gslalom_m_headers[1,]  #set row 1 as column names
-colnames(gslalom_m_headers)[1] <- "name"  #rename first column to team/athlete name
-columns <- ncol(gslalom_m_headers)  #save number of columns
-
-#names
-gslalom_m_names <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView1 td:nth-child(1)')
-gslalom_m_names <- html_text(gslalom_m_names)
-gslalom_m_names <- as.data.frame(gslalom_m_names)
-#copy <- gslalom_m_names
-gslalom_m_names[,1] <- gsub("\\(.*","",gslalom_m_names[,1])
-gslalom_m_names[,1] <- sub("\\s+$", "", gslalom_m_names[,1])
-#copy[,1] <- str_replace(copy[,1], "([`(`,`)`])", "")
-#copy[,1] <- gsub("\\..(", "", "\\.)")
-
-#odds hi lo
-gslalom_m_hilo <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView1 td+ td')
-gslalom_m_hilo <- html_text(gslalom_m_hilo)
-gslalom_m_hilo <- data.frame(matrix(unlist(gslalom_m_hilo), ncol = hilo_cols, byrow = TRUE))
-
-#odds
-gslalom_m_odds <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView2 td')
-gslalom_m_odds <- html_text(gslalom_m_odds)
-gslalom_m_odds <- data.frame(matrix(unlist(gslalom_m_odds), ncol = columns - 3, byrow = TRUE))
-
-#bind columns
-gslalom_m <- gslalom_m_names %>%
-  bind_cols(gslalom_m_hilo) %>%
-  bind_cols(gslalom_m_odds) %>%
-  head(-1)
-
-#name cols
-names(gslalom_m) <- names(gslalom_m_headers)  #convert to headers df names
-
-#remove unwanted df's
-rm(gslalom_m_hilo, gslalom_m_names, gslalom_m_odds, gslalom_m_headers)
+nicerodds_scraper <- function(url, hilo_cols = 2) {
+  
+  #read in and save url
+  webpage <- read_html(url)
+  
+  #read in event
+  event <- html_nodes(webpage, '.subItemSelected')
+  event <- html_text(event)
+  #read in sport
+  # sport <- html_nodes(webpage, '#subnavdiv2_1+ .sublevel2')
+  # sport <- html_text(sport)
+  
+  #headers
+  event_headers <- html_nodes(webpage, 'th')  #read in 'headers' node
+  event_headers <- html_text(event_headers)  #extract
+  event_headers <- data.frame(matrix(unlist(event_headers), nrow = 1), stringsAsFactors = FALSE)  #convert to df
+  
+  names(event_headers) <- event_headers[1,]  #set row 1 as column names
+  colnames(event_headers)[1] <- "name"  #rename first column to team/athlete name
+  columns <- ncol(event_headers)  #save number of columns
+  
+  #names
+  event_names <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView1 td:nth-child(1)')
+  event_names <- html_text(event_names)
+  event_names <- as.data.frame(event_names)
+  
+  event_names[,1] <- gsub("\\(.*","", event_names[,1])  #remove country abbreviations and parenthesis from name col
+  event_names[,1] <- sub("\\s+$", "", event_names[,1])  #remove trailing white space
+  
+  #odds hi lo
+  event_hilo <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView1 td+ td')
+  event_hilo <- html_text(event_hilo)
+  event_hilo <- data.frame(matrix(unlist(event_hilo), ncol = hilo_cols, byrow = TRUE))
+  
+  #odds sites
+  event_odds <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView2 td')
+  event_odds <- html_text(event_odds)
+  event_odds <- data.frame(matrix(unlist(event_odds), ncol = columns - 3, byrow = TRUE))
+  
+  #bind columns
+  event_df <- event_names %>%
+    bind_cols(event_hilo) %>%
+    bind_cols(event_odds) %>%
+    head(-1)
+  
+  #will need to do something with duplicate names similar to what I did with baseball
+  
+  #name cols
+  names(event_df) <- names(event_headers)  #convert to headers df names
+  
+  #add event col
+  event_df$event <- event
+  
+  #remove unwanted df's
+  #rm(event_hilo, event_names, event_odds, event_headers)
+  
+  #return event df
+  event_df
+}
