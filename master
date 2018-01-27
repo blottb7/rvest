@@ -39,12 +39,12 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
   #odds hi lo
   event_hilo <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView1 td+ td')
   event_hilo <- html_text(event_hilo)
-  event_hilo <- data.frame(matrix(unlist(event_hilo), ncol = hilo_cols, byrow = TRUE))
+  event_hilo <- data.frame(matrix(as.numeric(unlist(event_hilo)), ncol = hilo_cols, byrow = TRUE))
   
   #odds sites
   event_odds <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView2 td')
   event_odds <- html_text(event_odds)
-  event_odds <- data.frame(matrix(unlist(event_odds), ncol = columns - 3, byrow = TRUE))
+  event_odds <- data.frame(matrix(as.numeric(unlist(event_odds)), ncol = columns - 3, byrow = TRUE))
   
   #bind columns
   event_df <- event_names %>%
@@ -63,12 +63,14 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
   #remove unwanted df's
   #rm(event_hilo, event_names, event_odds, event_headers)
   
+  #add ifelse() for event that there are no odds posted
+  
   #return event df
   event_df
 }
 
-# url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
-# slalom_m <- nicerodds_scraper(url)
+url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
+slalom_m <- nicerodds_scraper(url)
 # url <- 'http://www.nicerodds.co.uk/olympics-mens-giant-slalom'
 # giant_slalom_m <- nicerodds_scraper(url)
 # url <- 'http://www.nicerodds.co.uk/olympics-mens-downhill'
@@ -94,4 +96,7 @@ urls <- as.list(c('http://www.nicerodds.co.uk/olympics-mens-slalom',
 alpine <- lapply(urls, nicerodds_scraper)
 alpine <- do.call(bind_rows, alpine)
 alpine$sport <- "alpine"
+
+copy <- alpine
+copy[,"Highestodds"] <- as.numeric(copy[,"Highestodds"])
 
