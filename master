@@ -114,5 +114,28 @@ biathlon <- lapply(urls, nicerodds_scraper)
 biathlon <- do.call(bind_rows, biathlon)
 biathlon$sport <- "biathlon"
 
+urls <- as.list(c('http://www.nicerodds.co.uk/olympics-cross-country-mens-15-km-freestyle',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-skiathlon',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-50-km',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-4x10-mix-relay',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-sprint-classic',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-sprint-relay',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-10-km-freestyle',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-skiathlon',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-30-km-classical',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-4x5-mix-relay',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-sprint-relay-skate',
+                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-sprint-classic')
+                )
+
+cross_country <- lapply(urls, nicerodds_scraper)
+cross_country <- do.call(bind_rows, cross_country)
+cross_country$sport <- "cross_country"
+
 all_events <- alpine %>%
-  bind_rows(biathlon)
+  bind_rows(biathlon) %>%
+  bind_rows(cross_country)
+#all_events$row_means <- rowMeans(all_events, na.rm = TRUE)
+
+#Paf and Unibet and the same, so get rid of Paf
+#Look for other duplicate cols
