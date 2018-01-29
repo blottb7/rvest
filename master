@@ -7,6 +7,7 @@ library(stringr)
 #global vars
 hilo_cols <- 2
 
+#Function for scrapign nicerodds website
 nicerodds_scraper <- function(url, hilo_cols = 2) {
   
   #read in and save url
@@ -15,10 +16,7 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
   #read in event
   event <- html_nodes(webpage, '.subItemSelected')
   event <- html_text(event)
-  #read in sport
-  # sport <- html_nodes(webpage, '#subnavdiv2_1+ .sublevel2')
-  # sport <- html_text(sport)
-  
+ 
   #headers
   event_headers <- html_nodes(webpage, 'th')  #read in 'headers' node
   event_headers <- html_text(event_headers)  #extract
@@ -60,25 +58,11 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
   #add event col
   event_df$event <- event
   
-  #remove unwanted df's
-  #rm(event_hilo, event_names, event_odds, event_headers)
-  
   #add ifelse() for event that there are no odds posted
   
   #return event df
   event_df
 }
-
-# url <- 'http://www.nicerodds.co.uk/olympics-mens-slalom'
-# slalom_m <- nicerodds_scraper(url)
-# url <- 'http://www.nicerodds.co.uk/olympics-mens-giant-slalom'
-# giant_slalom_m <- nicerodds_scraper(url)
-# url <- 'http://www.nicerodds.co.uk/olympics-mens-downhill'
-# downhill_m <- nicerodds_scraper(url)
-# 
-# all_events <- slalom_m %>%
-#   bind_rows(giant_slalom_m) %>%
-#   bind_rows(downhill_m)
 
 urls <- as.list(c('http://www.nicerodds.co.uk/olympics-mens-slalom',
           'http://www.nicerodds.co.uk/olympics-mens-giant-slalom',
@@ -132,10 +116,36 @@ cross_country <- lapply(urls, nicerodds_scraper)
 cross_country <- do.call(bind_rows, cross_country)
 cross_country$sport <- "cross_country"
 
+#hockey
+urls <- as.list(c('http://www.nicerodds.co.uk/olympics-ice-hockey-men'),
+                'http://www.nicerodds.co.uk/olympics-ice-hockey-women')
+
+hockey <- lapply(urls, nicerodds_scraper)
+hockey <- do.call(bind_rows, hockey)
+hockey$sport <- "hockey"
+
+#ski jumping
+urls <- as.list(c('http://www.nicerodds.co.uk/olympics-ski-jumping-mens-normal-hill'),
+                'http://www.nicerodds.co.uk/olympics-ski-jumping-mens-large-hill',
+                'http://www.nicerodds.co.uk/olympics-ski-jumping-mens-large-hill-team',
+                'http://www.nicerodds.co.uk/olympics-ski-jumping-womens-normal-hill')
+
+ski_jumping <- lapply(urls, nicerodds_scraper)
+ski_jumping <- do.call(bind_rows, ski_jumping)
+ski_jumping$sport <- "ski_jumping"
+
 all_events <- alpine %>%
   bind_rows(biathlon) %>%
-  bind_rows(cross_country)
-#all_events$row_means <- rowMeans(all_events, na.rm = TRUE)
+  bind_rows(cross_country) %>%
+  bind_rows(hockey) %>%
+  bind_rows(ski_jumping)
 
 #Paf and Unibet and the same, so get rid of Paf
+all_events$Unibet <- NULL
+
+#all_events$row_means <- rowMeans(all_events, na.rm = TRUE)
 #Look for other duplicate cols
+
+#to do:
+#1) combine by same name in same event
+#2) get rid of non-American symbols
