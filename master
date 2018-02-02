@@ -82,7 +82,7 @@ alpine <- do.call(bind_rows, alpine)
 alpine$sport <- "alpine"
 
 urls <- as.list(c('http://www.nicerodds.co.uk/olympics-biathlon-men-10-km-sprint',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-men-10-km-sprint',
+                  'http://www.nicerodds.co.uk/olympics-biathlon-men-12-5-km-pursuit',
                   'http://www.nicerodds.co.uk/olympics-biathlon-men-15-km-mass-start',
                   'http://www.nicerodds.co.uk/olympics-biathlon-men-20-km-individual',
                   'http://www.nicerodds.co.uk/olympics-biathlon-men-relay',
@@ -175,12 +175,11 @@ all_events1 <- all_events1 %>%
   left_join(all_events2, by = c("sport", "event")) %>%
   mutate(true_odds = implied_odds / event_odds_tot)
 # #checks to make sure true odds add to 1 for each event
-# all_events_new <- all_events1 %>%
-#   group_by(sport, event) %>%
-#   summarize(event_true_odds_tot = sum(true_odds)) %>%
-# left_join(all_events1, by = c("sport", "event"))
+all_events_new <- all_events1 %>%
+  group_by(sport, event) %>%
+  summarize(event_true_odds_tot = sum(true_odds))
 
-rm(all_events2)
+#rm(all_events2)
 #
 #find odds of second place
 
@@ -218,13 +217,6 @@ slalom <- cbind(slalom, true_odds_sec)
 #   filter(levels(factor(event))[1])
 
 n_events <- levels(factor(all_events1$event))
-
-# for(i in seq_along(n_events)) {
-#   df[i] <- n_events[i]
-#   #print(df[i])
-#   df[i]
-# }
-#consider also trying separate()?
 
 df <- as.data.frame()
 for(i in seq_along(n_events)) {
