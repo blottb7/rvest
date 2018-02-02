@@ -202,13 +202,39 @@ odds_second <- function(x) {
     #return(new_odds[i])
   }
   Matrix <- t(do.call(cbind, List))
-  print(Matrix)
+  #print(Matrix)
 }
 
 slalom <- all_events1 %>% filter(event == "Slalom men")
 #odds_second(slalom$true_odds)
 #slalom$true_odds_second <- odds_second(slalom$true_odds)
 true_odds_sec <- odds_second(slalom$true_odds)
-#new_df <- cbind(slalom, true_odds_sec)
+# #new_df <- cbind(slalom, true_odds_sec)
 slalom <- cbind(slalom, true_odds_sec)
+# #
+
+#create a list of data frames by event
+# df[1] <- all_events1 %>% 
+#   filter(levels(factor(event))[1])
+
+n_events <- levels(factor(all_events1$event)) 
+for(i in seq_along(n_events)) {
+  df[i] <- all_events1$event[i]
+  #all_events1$event
+}
+
+#####
+all_events1 %>% group_by(event) %>% summarise(odds_second(true_odds))
+all_events1 %>% group_by(event) %>% summarise_each(odds_second(true_odds))
 #
+all_events2 <- all_events1 %>%
+  group_by(event) %>%
+  summarize(true_odds_second = odds_second(true_odds))
+
+all_events2 <- all_events1 %>%
+  group_by(event) %>%
+  summarize(true_odds_second = mean(true_odds))
+
+all_events2 <- all_events1 %>%
+  group_by(event)
+lapply(group_by(all_events1$true_odds, event), mean)
