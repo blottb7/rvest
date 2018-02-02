@@ -16,7 +16,7 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
   #read in event
   event <- html_nodes(webpage, '.subItemSelected')
   event <- html_text(event)
- 
+  
   #headers
   event_headers <- html_nodes(webpage, 'th')  #read in 'headers' node
   event_headers <- html_text(event_headers)  #extract
@@ -65,17 +65,17 @@ nicerodds_scraper <- function(url, hilo_cols = 2) {
 }
 
 urls <- as.list(c('http://www.nicerodds.co.uk/olympics-mens-slalom',
-          'http://www.nicerodds.co.uk/olympics-mens-giant-slalom',
-          'http://www.nicerodds.co.uk/olympics-mens-downhill',
-          'http://www.nicerodds.co.uk/olympics-mens-combined',
-          'http://www.nicerodds.co.uk/olympics-mens-super-g',
-          'http://www.nicerodds.co.uk/olympics-alpine-team-event',
-          'http://www.nicerodds.co.uk/olympics-womens-slalom',
-          'http://www.nicerodds.co.uk/olympics-womens-giant-slalom',
-          'http://www.nicerodds.co.uk/olympics-womens-downhill',
-          'http://www.nicerodds.co.uk/olympics-womens-combined',
-          'http://www.nicerodds.co.uk/olympics-womens-super-g')
-          )
+                  'http://www.nicerodds.co.uk/olympics-mens-giant-slalom',
+                  'http://www.nicerodds.co.uk/olympics-mens-downhill',
+                  'http://www.nicerodds.co.uk/olympics-mens-combined',
+                  'http://www.nicerodds.co.uk/olympics-mens-super-g',
+                  'http://www.nicerodds.co.uk/olympics-alpine-team-event',
+                  'http://www.nicerodds.co.uk/olympics-womens-slalom',
+                  'http://www.nicerodds.co.uk/olympics-womens-giant-slalom',
+                  'http://www.nicerodds.co.uk/olympics-womens-downhill',
+                  'http://www.nicerodds.co.uk/olympics-womens-combined',
+                  'http://www.nicerodds.co.uk/olympics-womens-super-g')
+)
 
 alpine <- lapply(urls, nicerodds_scraper)
 alpine <- do.call(bind_rows, alpine)
@@ -92,7 +92,7 @@ urls <- as.list(c('http://www.nicerodds.co.uk/olympics-biathlon-men-10-km-sprint
                   'http://www.nicerodds.co.uk/olympics-biathlon-women-15-km-individual',
                   'http://www.nicerodds.co.uk/olympics-biathlon-women-relay',
                   'http://www.nicerodds.co.uk/olympics-biathlon-mixed-relay')
-                )
+)
 
 biathlon <- lapply(urls, nicerodds_scraper)
 biathlon <- do.call(bind_rows, biathlon)
@@ -110,7 +110,7 @@ urls <- as.list(c('http://www.nicerodds.co.uk/olympics-cross-country-mens-15-km-
                   'http://www.nicerodds.co.uk/olympics-cross-country-womens-4x5-mix-relay',
                   'http://www.nicerodds.co.uk/olympics-cross-country-womens-sprint-relay-skate',
                   'http://www.nicerodds.co.uk/olympics-cross-country-womens-sprint-classic')
-                )
+)
 
 cross_country <- lapply(urls, nicerodds_scraper)
 cross_country <- do.call(bind_rows, cross_country)
@@ -143,9 +143,198 @@ all_events <- alpine %>%
 #Paf and Unibet and the same, so get rid of Paf
 all_events$Unibet <- NULL
 
-#all_events$row_means <- rowMeans(all_events, na.rm = TRUE)
+#remove "Any Other" from $name
+all_events <- all_events %>%
+  filter(!grepl("Any Other", name))
+
 #Look for other duplicate cols
 
 #to do:
 #1) combine by same name in same event
 #2) get rid of non-American symbols
+#3) get rid of names that are "Any other athlete" and the like
+all_events_odds <- all_events %>%
+  select(-name, -Highestodds, -Lowestodds, -event, -sport)
+
+all_events_odds$mean_odds <- rowMeans(all_events_odds, na.rm = TRUE)
+
+all_events_odds <- all_events_odds %>%
+  select(mean_odds)
+all_events <- bind_cols(all_events, all_events_odds)
+rm(all_events_odds)
+#
+all_events1 <- all_events %>%
+  select(name, sport, event, mean_odds) %>%
+  filter(!is.na(mean_odds)) %>%
+  mutate(implied_odds = 1 / mean_odds)
+#
+all_events2 <- all_events1 %>%
+  group_by(sport, event) %>%
+  summarize(event_odds_tot = sum(implied_odds))
+all_events1 <- all_events1 %>%
+  left_join(all_events2, by = c("sport", "event")) %>%
+  mutate(true_odds = implied_odds / event_odds_tot)
+#checks to make sure true odds add to 1 for each event
+all_events_new <- all_events1 %>%
+  group_by(sport, event) %>%
+  summarize(event_true_odds_tot = sum(true_odds))
+left_join(all_events1, by = c("sport", "event"))
+
+rm(all_events2)
+#
+#find odds of second place
+slalom <- all_events1 %>% filter(event == "Slalom men")
+slalom$true_odds_sec <- NA
+
+#person 1
+slalom$true_odds_sec[1] <- (slalom$true_odds[1] / (1 - slalom$true_odds[2])) * slalom$true_odds[2] +
+                           (slalom$true_odds[1] / (1 - slalom$true_odds[3])) * slalom$true_odds[3] + #... +
+                           (slalom$true_odds[1] / (1 - slalom$true_odds[length(slalom$true_odds)])) * slalom$true_odds[length(slalom$true_odds)]
+  #- (the case of itself) (slalom$true_odds[1] / (1-slalom$true_odds[1])) * slalom$true_odds[1]
+
+#person 2
+slalom$true_odds_sec[2] <- slalom$true_odds[2] / (1 - slalom$true_odds[1]) * slalom$true_odds[1] +
+                           slalom$true_odds[2] / (1 - slalom$true_odds[2]) * slalom$true_odds[2]
+                           slalom$true_odds[2] / (1 - slalom$true_odds[3]) * slalom$true_odds[3] + #... +
+                           slalom$true_odds[2] / (1 - slalom$true_odds[length(slalom$true_odds)]) * slalom$true_odds[length(slalom$true_odds)]
+                           - slalom$true_odds[2] / (1 - slalom$true_odds[2]) * slalom$true_odds[2]
+
+slalom$dum_var <- round(slalom$true_odds / (1 - slalom$true_odds) * slalom$true_odds, 5)
+                           
+odds_second <- function(x) {
+
+  for(i in 1:length(x)) {
+
+    new_odds <- -1 * (x[i] / (1 - x[i])) * x[i]
+    
+    for(j in 1:length(x)) {
+
+      new_odds <- new_odds + (x[i] / (1 - x[j])) * x[j]
+    }
+    
+   print(new_odds)
+   #return(new_odds[i])
+  }
+#####
+}
+
+odds_second <- function(x) {
+  
+  List <- list()
+  for(i in 1:length(x)) {
+    
+    new_odds <- -1 * (x[i] / (1 - x[i])) * x[i]
+    
+    for(j in 1:length(x)) {
+      
+      new_odds <- new_odds + (x[i] / (1 - x[j])) * x[j]
+    }
+    List[[i]] <- new_odds
+    #print(new_odds)
+    print(List[[i]])
+    #return(new_odds[i])
+  }
+  Matrix <- do.call(cbind, List)
+}
+
+#slalom$true_odds_second <- odds_second(slalom$true_odds)
+df <- odds_second(slalom$true_odds)
+new_df <- cbind(slalom, df)
+
+#odds_second(slalom$true_odds)
+
+#####
+odds_second <- function(x) {
+  
+  List <- list()
+  for(i in 1:length(x)) {
+    
+    new_odds <- -1 * (x[i] / (1 - x[i])) * x[i]
+    
+    for(j in 1:length(x)) {
+      
+      new_odds <- new_odds + (x[i] / (1 - x[j])) * x[j]
+    }
+    List[[i]] <- new_odds
+    #print(new_odds)
+    #print(List[[i]])
+    #return(new_odds[i])
+  }
+  Matrix <- t(do.call(cbind, List))
+  print(Matrix)
+}
+
+odds_second(slalom$true_odds)
+#slalom$true_odds_second <- odds_second(slalom$true_odds)
+true_odds_sec <- odds_second(slalom$true_odds)
+#new_df <- cbind(slalom, true_odds_sec)
+slalom <- cbind(slalom, true_odds_sec)
+#
+empty <- as.data.frame(NA)
+odds_second <- function(x) {
+  
+  for(i in 1:length(x)) {
+    
+    new_odds <- -1 * (x[i] / (1 - x[i])) * x[i]
+    for(j in 1:length(x)) {
+      
+      new_odds <- new_odds + (x[i] / (1 - x[j])) * x[j]
+    }
+    print(new_odds)
+    #return(new_odds[i])
+  }
+  
+}
+
+
+temp[] <- odds_second(slalom$true_odds)
+slalom$true_odds_second <- odds_second(slalom$true_odds)
+
+lapply(slalom$true_odds, odds_second)
+
+# odds_second <- function(x) {
+#   
+#   for(i in 1:length(x)) {
+#     new_odds <- -1 * (x[i] / (1 - x[i])) * x[i] 
+#     
+#     for(j in 1:length(x)) {
+#       new_odds <- new_odds[i] + (x[i] / (1 - x[j])) * x[j]
+#     }
+#     print(new_odds)
+#   }
+#   
+# }
+
+odds_second(slalom$true_odds_sec)
+
+class(odds_second(slalom$true_odds))
+as.matrix(unlist(odds_second(slalom$true_odds)))
+as.matrix(odds_second(slalom$true_odds))
+#new_df <- as.data.frame(odds_second(slalom$true_odds))
+#
+slalom$true_odds_sec <- NA
+slalom$true_odds_sec <- odds_second(slalom$true_odds)
+#
+for(i in 1:nrow(slalom_m)) {
+  slalom_m$true_odds_sec <- sum(slalom_m$true_odds) - slalom_m$true_odds[i]
+}
+
+for (k in 5:29){
+  for (j.event in event.list) {
+    obs <- which(secondodds$discipline.event == j.event)
+    eventsum <- sum((secondodds[obs[1]:obs[length(obs)],k]/(1-secondodds[obs[1]:obs[length(obs)],k])), na.rm=TRUE)
+    for (i in obs[1]:obs[length(obs)]) {
+      secondodds[i,k] = secondodds[i,k] * (eventsum - (secondodds[i,k]/(1-secondodds[i,k])))
+    }
+    
+  }
+}
+
+#general equation
+#for each sport-event
+all_events1$second_odds <- 
+all_events1$true_odds[i] / (sum(all_events1$true_odds) - all_events1$true_odds[])
+
+
+                            
+                            #minus the case when it equals itself!!!!
