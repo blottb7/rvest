@@ -174,74 +174,15 @@ all_events2 <- all_events1 %>%
 all_events1 <- all_events1 %>%
   left_join(all_events2, by = c("sport", "event")) %>%
   mutate(true_odds = implied_odds / event_odds_tot)
-#checks to make sure true odds add to 1 for each event
-all_events_new <- all_events1 %>%
-  group_by(sport, event) %>%
-  summarize(event_true_odds_tot = sum(true_odds))
-left_join(all_events1, by = c("sport", "event"))
+# #checks to make sure true odds add to 1 for each event
+# all_events_new <- all_events1 %>%
+#   group_by(sport, event) %>%
+#   summarize(event_true_odds_tot = sum(true_odds)) %>%
+# left_join(all_events1, by = c("sport", "event"))
 
 rm(all_events2)
 #
 #find odds of second place
-slalom <- all_events1 %>% filter(event == "Slalom men")
-slalom$true_odds_sec <- NA
-
-#person 1
-slalom$true_odds_sec[1] <- (slalom$true_odds[1] / (1 - slalom$true_odds[2])) * slalom$true_odds[2] +
-                           (slalom$true_odds[1] / (1 - slalom$true_odds[3])) * slalom$true_odds[3] + #... +
-                           (slalom$true_odds[1] / (1 - slalom$true_odds[length(slalom$true_odds)])) * slalom$true_odds[length(slalom$true_odds)]
-  #- (the case of itself) (slalom$true_odds[1] / (1-slalom$true_odds[1])) * slalom$true_odds[1]
-
-#person 2
-slalom$true_odds_sec[2] <- slalom$true_odds[2] / (1 - slalom$true_odds[1]) * slalom$true_odds[1] +
-                           slalom$true_odds[2] / (1 - slalom$true_odds[2]) * slalom$true_odds[2]
-                           slalom$true_odds[2] / (1 - slalom$true_odds[3]) * slalom$true_odds[3] + #... +
-                           slalom$true_odds[2] / (1 - slalom$true_odds[length(slalom$true_odds)]) * slalom$true_odds[length(slalom$true_odds)]
-                           - slalom$true_odds[2] / (1 - slalom$true_odds[2]) * slalom$true_odds[2]
-
-slalom$dum_var <- round(slalom$true_odds / (1 - slalom$true_odds) * slalom$true_odds, 5)
-                           
-odds_second <- function(x) {
-
-  for(i in 1:length(x)) {
-
-    new_odds <- -1 * (x[i] / (1 - x[i])) * x[i]
-    
-    for(j in 1:length(x)) {
-
-      new_odds <- new_odds + (x[i] / (1 - x[j])) * x[j]
-    }
-    
-   print(new_odds)
-   #return(new_odds[i])
-  }
-#####
-}
-
-odds_second <- function(x) {
-  
-  List <- list()
-  for(i in 1:length(x)) {
-    
-    new_odds <- -1 * (x[i] / (1 - x[i])) * x[i]
-    
-    for(j in 1:length(x)) {
-      
-      new_odds <- new_odds + (x[i] / (1 - x[j])) * x[j]
-    }
-    List[[i]] <- new_odds
-    #print(new_odds)
-    print(List[[i]])
-    #return(new_odds[i])
-  }
-  Matrix <- do.call(cbind, List)
-}
-
-#slalom$true_odds_second <- odds_second(slalom$true_odds)
-df <- odds_second(slalom$true_odds)
-new_df <- cbind(slalom, df)
-
-#odds_second(slalom$true_odds)
 
 #####
 odds_second <- function(x) {
@@ -264,77 +205,10 @@ odds_second <- function(x) {
   print(Matrix)
 }
 
-odds_second(slalom$true_odds)
+slalom <- all_events1 %>% filter(event == "Slalom men")
+#odds_second(slalom$true_odds)
 #slalom$true_odds_second <- odds_second(slalom$true_odds)
 true_odds_sec <- odds_second(slalom$true_odds)
 #new_df <- cbind(slalom, true_odds_sec)
 slalom <- cbind(slalom, true_odds_sec)
 #
-empty <- as.data.frame(NA)
-odds_second <- function(x) {
-  
-  for(i in 1:length(x)) {
-    
-    new_odds <- -1 * (x[i] / (1 - x[i])) * x[i]
-    for(j in 1:length(x)) {
-      
-      new_odds <- new_odds + (x[i] / (1 - x[j])) * x[j]
-    }
-    print(new_odds)
-    #return(new_odds[i])
-  }
-  
-}
-
-
-temp[] <- odds_second(slalom$true_odds)
-slalom$true_odds_second <- odds_second(slalom$true_odds)
-
-lapply(slalom$true_odds, odds_second)
-
-# odds_second <- function(x) {
-#   
-#   for(i in 1:length(x)) {
-#     new_odds <- -1 * (x[i] / (1 - x[i])) * x[i] 
-#     
-#     for(j in 1:length(x)) {
-#       new_odds <- new_odds[i] + (x[i] / (1 - x[j])) * x[j]
-#     }
-#     print(new_odds)
-#   }
-#   
-# }
-
-odds_second(slalom$true_odds_sec)
-
-class(odds_second(slalom$true_odds))
-as.matrix(unlist(odds_second(slalom$true_odds)))
-as.matrix(odds_second(slalom$true_odds))
-#new_df <- as.data.frame(odds_second(slalom$true_odds))
-#
-slalom$true_odds_sec <- NA
-slalom$true_odds_sec <- odds_second(slalom$true_odds)
-#
-for(i in 1:nrow(slalom_m)) {
-  slalom_m$true_odds_sec <- sum(slalom_m$true_odds) - slalom_m$true_odds[i]
-}
-
-for (k in 5:29){
-  for (j.event in event.list) {
-    obs <- which(secondodds$discipline.event == j.event)
-    eventsum <- sum((secondodds[obs[1]:obs[length(obs)],k]/(1-secondodds[obs[1]:obs[length(obs)],k])), na.rm=TRUE)
-    for (i in obs[1]:obs[length(obs)]) {
-      secondodds[i,k] = secondodds[i,k] * (eventsum - (secondodds[i,k]/(1-secondodds[i,k])))
-    }
-    
-  }
-}
-
-#general equation
-#for each sport-event
-all_events1$second_odds <- 
-all_events1$true_odds[i] / (sum(all_events1$true_odds) - all_events1$true_odds[])
-
-
-                            
-                            #minus the case when it equals itself!!!!
