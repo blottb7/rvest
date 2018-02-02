@@ -219,8 +219,9 @@ slalom <- cbind(slalom, true_odds_sec)
 
 n_events <- levels(factor(all_events1$event)) 
 for(i in seq_along(n_events)) {
-  df[i] <- all_events1$event[i]
-  #all_events1$event
+  df[i] <- n_events[i]
+  #print(df[i])
+  df[i]
 }
 
 #####
