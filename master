@@ -1,403 +1,142 @@
+#libraries
 library(rvest)
 library(dplyr)
 library(tidyr)
 library(stringr)
-#library(selectr)
 
-#global vars
-hilo_cols <- 2
+#read in and convert events
+url <- 'https://en.wikipedia.org/wiki/Alpine_skiing_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+alpine <- html_nodes(webpage, 'td~ td+ td b')
+alpine <- html_text(alpine)
+alpine <- as.data.frame(alpine)
 
-#Function for scrapign nicerodds website
-nicerodds_scraper <- function(url, hilo_cols = 2) {
-  
-  #read in and save url
-  webpage <- read_html(url)
-  
-  #read in event
-  event <- html_nodes(webpage, '.subItemSelected')
-  event <- html_text(event)
-  
-  #headers
-  event_headers <- html_nodes(webpage, 'th')  #read in 'headers' node
-  event_headers <- html_text(event_headers)  #extract
-  event_headers <- data.frame(matrix(unlist(event_headers), nrow = 1), stringsAsFactors = FALSE)  #convert to df
-  
-  names(event_headers) <- event_headers[1,]  #set row 1 as column names
-  colnames(event_headers)[1] <- "name"  #rename first column to team/athlete name
-  columns <- ncol(event_headers)  #save number of columns
-  
-  #names
-  event_names <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView1 td:nth-child(1)')
-  event_names <- html_text(event_names)
-  event_names <- as.data.frame(event_names)
-  
-  event_names[,1] <- gsub("\\(.*","", event_names[,1])  #remove country abbreviations and parenthesis from name col
-  event_names[,1] <- sub("\\s+$", "", event_names[,1])  #remove trailing white space
-  
-  #odds hi lo
-  event_hilo <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView1 td+ td')
-  event_hilo <- html_text(event_hilo)
-  event_hilo <- data.frame(matrix(as.numeric(unlist(event_hilo)), ncol = hilo_cols, byrow = TRUE))
-  
-  #odds sites
-  event_odds <- html_nodes(webpage, '#mainplh_boAutoOddsTable1_GridView2 td')
-  event_odds <- html_text(event_odds)
-  event_odds <- data.frame(matrix(as.numeric(unlist(event_odds)), ncol = columns - 3, byrow = TRUE))
-  
-  #bind columns
-  event_df <- event_names %>%
-    bind_cols(event_hilo) %>%
-    bind_cols(event_odds) %>%
-    head(-1)
-  
-  #will need to do something with duplicate names similar to what I did with baseball
-  
-  #name cols
-  names(event_df) <- names(event_headers)  #convert to headers df names
-  
-  #add event col
-  event_df$event <- event
-  
-  #add ifelse() for event that there are no odds posted
-  
-  #return event df
-  event_df
+url <- 'https://en.wikipedia.org/wiki/Biathlon_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+biathlon <- html_nodes(webpage, '.wikitable b')
+biathlon <- html_text(biathlon)
+biathlon <- as.data.frame(biathlon)
+
+url <- 'https://en.wikipedia.org/wiki/Bobsleigh_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+bobsleigh <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+bobsleigh <- html_text(bobsleigh)
+bobsleigh <- as.data.frame(bobsleigh)
+
+url <- 'https://en.wikipedia.org/wiki/Cross-country_skiing_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+cross_country <- html_nodes(webpage, '.wikitable b')
+cross_country <- html_text(cross_country)
+cross_country <- as.data.frame(cross_country)
+
+url <- 'https://en.wikipedia.org/wiki/Curling_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+curling <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+curling <- html_text(curling)
+curling <- as.data.frame(curling)
+
+url <- 'https://en.wikipedia.org/wiki/Figure_skating_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+figure_skating <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+figure_skating <- html_text(figure_skating)
+figure_skating <- as.data.frame(figure_skating)
+
+url <- 'https://en.wikipedia.org/wiki/Freestyle_skiing_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+freestyle_skiing <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+freestyle_skiing <- html_text(freestyle_skiing)
+freestyle_skiing <- as.data.frame(freestyle_skiing)
+
+hockey <- as.data.frame(c("mens_hockey", "womens_hockey"))
+names(hockey) <- "hockey"
+
+url <- 'https://en.wikipedia.org/wiki/Luge_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+luge <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+luge <- html_text(luge)
+luge <- as.data.frame(luge)
+
+url <- 'https://en.wikipedia.org/wiki/Nordic_combined_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+nordic_combined <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+nordic_combined <- html_text(nordic_combined)
+nordic_combined <- as.data.frame(nordic_combined)
+
+url <- 'https://en.wikipedia.org/wiki/Short_track_speed_skating_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+short_track <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+short_track <- html_text(short_track)
+short_track <- as.data.frame(short_track)
+
+url <- 'https://en.wikipedia.org/wiki/Skeleton_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+skeleton <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+skeleton <- html_text(skeleton)
+skeleton <- as.data.frame(skeleton)
+
+url <- 'https://en.wikipedia.org/wiki/Ski_jumping_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+ski_jumping <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+ski_jumping <- html_text(ski_jumping)
+ski_jumping <- as.data.frame(ski_jumping)
+
+url <- 'https://en.wikipedia.org/wiki/Snowboarding_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+snowboarding <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+snowboarding <- html_text(snowboarding)
+snowboarding <- as.data.frame(snowboarding)
+
+url <- 'https://en.wikipedia.org/wiki/Speed_skating_at_the_2018_Winter_Olympics'
+webpage <- read_html(url)
+speed_skating <- html_nodes(webpage, '.plainrowheaders td:nth-child(1)')
+speed_skating <- html_text(speed_skating)
+speed_skating <- as.data.frame(speed_skating)
+
+#function to create sport column from col name
+col_name_fn <- function(df) {
+  df$sport <- names(df)
+  names(df)[1] <- "event"
+  df
 }
 
-urls <- as.list(c('http://www.nicerodds.co.uk/olympics-mens-slalom',
-                  'http://www.nicerodds.co.uk/olympics-mens-giant-slalom',
-                  'http://www.nicerodds.co.uk/olympics-mens-downhill',
-                  'http://www.nicerodds.co.uk/olympics-mens-combined',
-                  'http://www.nicerodds.co.uk/olympics-mens-super-g',
-                  'http://www.nicerodds.co.uk/olympics-alpine-team-event',
-                  'http://www.nicerodds.co.uk/olympics-womens-slalom',
-                  'http://www.nicerodds.co.uk/olympics-womens-giant-slalom',
-                  'http://www.nicerodds.co.uk/olympics-womens-downhill',
-                  'http://www.nicerodds.co.uk/olympics-womens-combined',
-                  'http://www.nicerodds.co.uk/olympics-womens-super-g')
-)
+#assing col_name_fn to each sport
+alpine <- col_name_fn(alpine)
+biathlon <- col_name_fn(biathlon)
+bobsleigh <- col_name_fn(bobsleigh)
+cross_country <- col_name_fn(cross_country)
+curling <- col_name_fn(curling)
+figure_skating <- col_name_fn(figure_skating)
+freestyle_skiing <- col_name_fn(freestyle_skiing)
+hockey <- col_name_fn(hockey)
+luge <- col_name_fn(luge)
+nordic_combined <- col_name_fn(nordic_combined)
+short_track <- col_name_fn(short_track)
+skeleton <- col_name_fn(skeleton)
+ski_jumping <- col_name_fn(ski_jumping)
+snowboarding <- col_name_fn(snowboarding)
+speed_skating <- col_name_fn(speed_skating)
 
-alpine <- lapply(urls, nicerodds_scraper)
-alpine <- do.call(bind_rows, alpine)
-alpine$sport <- "alpine"
+#make df list and bind into one df
+df_list <- list(alpine, biathlon, bobsleigh, cross_country, curling, figure_skating, freestyle_skiing, 
+                hockey, luge, nordic_combined, short_track, skeleton, ski_jumping, snowboarding, speed_skating)
+all_events <- bind_rows(df_list)
 
-urls <- as.list(c('http://www.nicerodds.co.uk/olympics-biathlon-men-10-km-sprint',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-men-12-5-km-pursuit',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-men-15-km-mass-start',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-men-20-km-individual',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-men-relay',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-women-7-5-km-sprint',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-women-10-km-pursuit',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-women-12-5-km-mass-start',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-women-15-km-individual',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-women-relay',
-                  'http://www.nicerodds.co.uk/olympics-biathlon-mixed-relay')
-)
+#clean events
+  #remove "details" from char
+all_events$event <- gsub("details", "", all_events$event)
 
-biathlon <- lapply(urls, nicerodds_scraper)
-biathlon <- do.call(bind_rows, biathlon)
-biathlon$sport <- "biathlon"
+#assign sporting group to each sport
+all_events$sport_group <- all_events$sport
 
-urls <- as.list(c('http://www.nicerodds.co.uk/olympics-cross-country-mens-15-km-freestyle',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-skiathlon',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-50-km',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-4x10-mix-relay',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-sprint-classic',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-mens-sprint-relay',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-10-km-freestyle',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-skiathlon',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-30-km-classical',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-4x5-mix-relay',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-sprint-relay-skate',
-                  'http://www.nicerodds.co.uk/olympics-cross-country-womens-sprint-classic')
-)
+all_events$sport_group <- ifelse(all_events$sport_group == "bobsleigh" | all_events$sport_group == "skeleton" | all_events$sport_group == "luge",
+                                 "sleds", all_events$sport_group)
+all_events$sport_group <- ifelse(all_events$sport_group == "freestyle_skiing" | all_events$sport_group == "snowboarding",
+                                 "freestyle_and_boards", all_events$sport_group)
+all_events$sport_group <- ifelse(all_events$sport_group == "nordic_combined" | all_events$sport_group == "ski_jumping",
+                                 "jumping", all_events$sport_group)
+all_events$sport_group <- ifelse(all_events$sport_group == "short_track" | all_events$sport_group == "speed_skating",
+                                 "speed_skating", all_events$sport_group)
 
-cross_country <- lapply(urls, nicerodds_scraper)
-cross_country <- do.call(bind_rows, cross_country)
-cross_country$sport <- "cross_country"
+saveRDS(all_events, "C:/Users/Ben/Desktop/R Projects/olympics/all_events_2018.rds")
 
-#hockey
-urls <- as.list(c('http://www.nicerodds.co.uk/olympics-ice-hockey-men'),
-                'http://www.nicerodds.co.uk/olympics-ice-hockey-women')
-
-hockey <- lapply(urls, nicerodds_scraper)
-hockey <- do.call(bind_rows, hockey)
-hockey$sport <- "hockey"
-
-#ski jumping
-urls <- as.list(c('http://www.nicerodds.co.uk/olympics-ski-jumping-mens-normal-hill'),
-                'http://www.nicerodds.co.uk/olympics-ski-jumping-mens-large-hill',
-                'http://www.nicerodds.co.uk/olympics-ski-jumping-mens-large-hill-team',
-                'http://www.nicerodds.co.uk/olympics-ski-jumping-womens-normal-hill')
-
-ski_jumping <- lapply(urls, nicerodds_scraper)
-ski_jumping <- do.call(bind_rows, ski_jumping)
-ski_jumping$sport <- "ski_jumping"
-
-all_events <- alpine %>%
-  bind_rows(biathlon) %>%
-  bind_rows(cross_country) %>%
-  bind_rows(hockey) %>%
-  bind_rows(ski_jumping)
-
-#Paf and Unibet and the same, so get rid of Paf
-all_events$Unibet <- NULL
-
-#remove "Any Other" from $name
-all_events <- all_events %>%
-  filter(!grepl("Any Other", name))
-
-#Look for other duplicate cols
-
-#to do:
-#1) combine by same name in same event
-#2) get rid of non-American symbols
-#3) get rid of names that are "Any other athlete" and the like
-all_events_odds <- all_events %>%
-  select(-name, -Highestodds, -Lowestodds, -event, -sport)
-
-all_events_odds$mean_odds <- rowMeans(all_events_odds, na.rm = TRUE)
-
-all_events_odds <- all_events_odds %>%
-  select(mean_odds)
-all_events <- bind_cols(all_events, all_events_odds)
-rm(all_events_odds)
-#
-all_events1 <- all_events %>%
-  select(name, sport, event, mean_odds) %>%
-  filter(!is.na(mean_odds)) %>%
-  mutate(implied_odds = 1 / mean_odds)
-#
-all_events2 <- all_events1 %>%
-  group_by(sport, event) %>%
-  summarize(event_odds_tot = sum(implied_odds))
-all_events1 <- all_events1 %>%
-  left_join(all_events2, by = c("sport", "event")) %>%
-  mutate(true_odds = implied_odds / event_odds_tot)
-# #checks to make sure true odds add to 1 for each event
-all_events_new <- all_events1 %>%
-  group_by(sport, event) %>%
-  summarize(event_true_odds_tot = sum(true_odds))
-
-#remove unneeded df's
-rm(alpine, biathlon, cross_country, hockey, ski_jumping)
-#rm(all_events2)
-#
-#find odds of second place
-
-#####
-odds_second <- function(x) {
-  
-  List <- list()
-  for(i in 1:length(x)) {
-    
-    new_odds <- -1 * (x[i] / (1 - x[i])) * x[i]
-    
-    for(j in 1:length(x)) {
-      
-      new_odds <- new_odds + (x[i] / (1 - x[j])) * x[j]
-    }
-    List[[i]] <- new_odds
-    #print(new_odds)
-    #print(List[[i]])
-    #return(new_odds[i])
-  }
-  Matrix <- t(do.call(cbind, List))
-  #print(Matrix)
-}
-
-#apply to each event
-n_events <- levels(factor(all_events1$event))
-
-# downhill_m <- all_events1 %>% filter(event == "Downhill men")
-# true_odds_sec <- odds_second(downhill_m$true_odds)
-# downhill_m <- cbind(downhill_m, true_odds_sec)
-# 
-# downhill_w <- all_events1 %>% filter(event == "Downhill women")
-# true_odds_sec <- odds_second(downhill_w$true_odds)
-# downhill_w <- cbind(downhill_w, true_odds_sec)
-# 
-# gslalom_m <- all_events1 %>% filter(event == "Giant slalom men")
-# true_odds_sec <- odds_second(downhill_w$true_odds)
-# downhill_w <- cbind(downhill_w, true_odds_sec)
-# 
-# gslalom_w <- all_events1 %>% filter(event == "Giant slalom women")
-# hockey_m <- all_events1 %>% filter(event == "Men")
-# ten_km_sprint_m <- all_events1 %>% filter(event == "Men's 10 km sprint")
-# twelve_km_pursuit_m <- all_events1 %>% filter(event == "Men's 12.5 km pursuit")
-# fifteen_km_free_m <- all_events1 %>% filter(event == "Men's 15 km freestyle")
-# fifteen_km_mass_m <- all_events1 %>% filter(event == "Men's 15 km mass start")
-# twenty_km_ind_m <- all_events1 %>% filter(event == "Men's 20 km individual")
-# fourxten_mixrelay_m <- all_events1 %>% filter(event == "Men's 4x10 mix relay")
-# fifty_km_m <- all_events1 %>% filter(event == "Men's 50 km")
-# normal_hill_m <- all_events1 %>% filter(event == "Men's normal hill")
-# bi_relay_m <- all_events1 %>% filter(event == "Men's relay")
-# skiathlon_m <- all_events1 %>% filter(event == "Men's skiathlon ")
-# sprint_classic_m <- all_events1 %>% filter(event == "Men's sprint classic")
-# sprint_relay_m <- all_events1 %>% filter(event == "Men's sprint relay ")
-# mixed_relay <- all_events1 %>% filter(event == "Mixed relay")
-# slalom_m <- all_events1 %>% filter(event == "Slalom men")
-# slalom_w <- all_events1 %>% filter(event == "Slalom women")
-# superg_m <- all_events1 %>% filter(event == "Super-G men")
-# superg_w <- all_events1 %>% filter(event == "Super-G women")
-# ten_km_free_w <- all_events1 %>% filter(event == "Women's 10 km freestyle")
-# ten_km_pursuit_w <- all_events1 %>% filter(event == "Women's 10 km pursuit")
-# twelve_km_mass_w <- all_events1 %>% filter(event == "Women's 12.5 km mass start")
-# fifteen_km_ind_w <- all_events1 %>% filter(event == "Women's 15 km individual")
-# thirty_km_classical_w <- all_events1 %>% filter(event == "Women's 30 km classical")
-# fourxfive_mixrelay_w <- all_events1 %>% filter(event == "Women's 4x5 mix relay")
-# seven_km_sprint_w <- all_events1 %>% filter(event == "Women's 7.5 km sprint")
-# bi_relay_w <- all_events1 %>% filter(event == "Women's relay")
-# skiathlon_w <- all_events1 %>% filter(event == "Women's skiathlon ")
-# sprint_classic_w <- all_events1 %>% filter(event == "Women's sprint classic" )
-# sprint_relay_w <- all_events1 %>% filter(event == "Women's sprint relay")
-#
-df1 <- all_events1 %>% filter(event == "Downhill men")
-df2 <- all_events1 %>% filter(event == "Downhill women")
-df3 <- all_events1 %>% filter(event == "Giant slalom men")
-df4 <- all_events1 %>% filter(event == "Giant slalom women")
-df5 <- all_events1 %>% filter(event == "Men")
-df6 <- all_events1 %>% filter(event == "Men's 10 km sprint")
-df7 <- all_events1 %>% filter(event == "Men's 12.5 km pursuit")
-df8 <- all_events1 %>% filter(event == "Men's 15 km freestyle")
-df9 <- all_events1 %>% filter(event == "Men's 15 km mass start")
-df10 <- all_events1 %>% filter(event == "Men's 20 km individual")
-df11 <- all_events1 %>% filter(event == "Men's 4x10 mix relay")
-df12 <- all_events1 %>% filter(event == "Men's 50 km")
-df13 <- all_events1 %>% filter(event == "Men's normal hill")
-df14 <- all_events1 %>% filter(event == "Men's relay")
-df15 <- all_events1 %>% filter(event == "Men's skiathlon ")
-df16 <- all_events1 %>% filter(event == "Men's sprint classic")
-df17 <- all_events1 %>% filter(event == "Men's sprint relay ")
-df18 <- all_events1 %>% filter(event == "Mixed relay")
-df19 <- all_events1 %>% filter(event == "Slalom men")
-df20 <- all_events1 %>% filter(event == "Slalom women")
-df21 <- all_events1 %>% filter(event == "Super-G men")
-df22 <- all_events1 %>% filter(event == "Super-G women")
-df23 <- all_events1 %>% filter(event == "Women's 10 km freestyle")
-df24 <- all_events1 %>% filter(event == "Women's 10 km pursuit")
-df25 <- all_events1 %>% filter(event == "Women's 12.5 km mass start")
-df26 <- all_events1 %>% filter(event == "Women's 15 km individual")
-df27 <- all_events1 %>% filter(event == "Women's 30 km classical")
-df28 <- all_events1 %>% filter(event == "Women's 4x5 mix relay")
-df29 <- all_events1 %>% filter(event == "Women's 7.5 km sprint")
-df30 <- all_events1 %>% filter(event == "Women's relay")
-df31 <- all_events1 %>% filter(event == "Women's skiathlon ")
-df32 <- all_events1 %>% filter(event == "Women's sprint classic" )
-df33 <- all_events1 %>% filter(event == "Women's sprint relay")
-
-true_odds_sec <- odds_second(df1$true_odds)
-df1 <- cbind(df1, true_odds_sec)
-true_odds_sec <- odds_second(df2$true_odds)
-df2 <- cbind(df2, true_odds_sec)
-true_odds_sec <- odds_second(df3$true_odds)
-df3 <- cbind(df3, true_odds_sec)
-true_odds_sec <- odds_second(df4$true_odds)
-df4 <- cbind(df4, true_odds_sec)
-true_odds_sec <- odds_second(df5$true_odds)
-df5 <- cbind(df5, true_odds_sec)
-true_odds_sec <- odds_second(df6$true_odds)
-df6 <- cbind(df6, true_odds_sec)
-true_odds_sec <- odds_second(df7$true_odds)
-df7 <- cbind(df7, true_odds_sec)
-true_odds_sec <- odds_second(df8$true_odds)
-df8 <- cbind(df8, true_odds_sec)
-true_odds_sec <- odds_second(df9$true_odds)
-df9 <- cbind(df9, true_odds_sec)
-true_odds_sec <- odds_second(df10$true_odds)
-df10 <- cbind(df10, true_odds_sec)
-true_odds_sec <- odds_second(df11$true_odds)
-df11 <- cbind(df11, true_odds_sec)
-true_odds_sec <- odds_second(df12$true_odds)
-df12 <- cbind(df12, true_odds_sec)
-true_odds_sec <- odds_second(df13$true_odds)
-df13 <- cbind(df13, true_odds_sec)
-true_odds_sec <- odds_second(df14$true_odds)
-df14 <- cbind(df14, true_odds_sec)
-true_odds_sec <- odds_second(df15$true_odds)
-df15 <- cbind(df15, true_odds_sec)
-true_odds_sec <- odds_second(df16$true_odds)
-df16 <- cbind(df16, true_odds_sec)
-true_odds_sec <- odds_second(df17$true_odds)
-df17 <- cbind(df17, true_odds_sec)
-true_odds_sec <- odds_second(df18$true_odds)
-df18 <- cbind(df18, true_odds_sec)
-true_odds_sec <- odds_second(df19$true_odds)
-df19 <- cbind(df19, true_odds_sec)
-true_odds_sec <- odds_second(df20$true_odds)
-df20 <- cbind(df20, true_odds_sec)
-true_odds_sec <- odds_second(df21$true_odds)
-df21 <- cbind(df21, true_odds_sec)
-true_odds_sec <- odds_second(df22$true_odds)
-df22 <- cbind(df22, true_odds_sec)
-true_odds_sec <- odds_second(df23$true_odds)
-df23 <- cbind(df23, true_odds_sec)
-true_odds_sec <- odds_second(df24$true_odds)
-df24 <- cbind(df24, true_odds_sec)
-true_odds_sec <- odds_second(df25$true_odds)
-df25 <- cbind(df25, true_odds_sec)
-true_odds_sec <- odds_second(df26$true_odds)
-df26 <- cbind(df26, true_odds_sec)
-true_odds_sec <- odds_second(df27$true_odds)
-df27 <- cbind(df27, true_odds_sec)
-true_odds_sec <- odds_second(df28$true_odds)
-df28 <- cbind(df28, true_odds_sec)
-true_odds_sec <- odds_second(df29$true_odds)
-df29 <- cbind(df29, true_odds_sec)
-true_odds_sec <- odds_second(df30$true_odds)
-df30 <- cbind(df30, true_odds_sec)
-true_odds_sec <- odds_second(df31$true_odds)
-df31 <- cbind(df31, true_odds_sec)
-true_odds_sec <- odds_second(df32$true_odds)
-df32 <- cbind(df32, true_odds_sec)
-true_odds_sec <- odds_second(df33$true_odds)
-df33 <- cbind(df33, true_odds_sec)
-
-#keep this on hold for now but keep working on it
-event_fn <- function(df, var, n_events = n_events) {
-  
-  for(i in seq_along(n_events)) {
-    filter(df, var == n_events[1])
-  }
-  
-}
-
-# slalom <- all_events1 %>% filter(event == "Slalom men")
-# #odds_second(slalom$true_odds)
-# #slalom$true_odds_second <- odds_second(slalom$true_odds)
-# true_odds_sec <- odds_second(slalom$true_odds)
-# # #new_df <- cbind(slalom, true_odds_sec)
-# slalom <- cbind(slalom, true_odds_sec)
-# # #
-# 
-# #create a list of data frames by event
-# # df[1] <- all_events1 %>% 
-# #   filter(levels(factor(event))[1])
-# 
-# n_events <- levels(factor(all_events1$event))
-# 
-# df <- as.data.frame()
-# for(i in seq_along(n_events)) {
-#   #df[i] <- filter(all_events1, event == n_events[i])
-#   df[i] <- all_events1 %>%
-#     filter(event == n_events[i])
-#   #print(df[i])
-#   #df[i]
-#   df[i]
-# }
-# 
-# #####
-# all_events1 %>% group_by(event) %>% summarise(odds_second(true_odds))
-# all_events1 %>% group_by(event) %>% summarise_each(odds_second(true_odds))
-# #
-# all_events2 <- all_events1 %>%
-#   group_by(event) %>%
-#   summarize(true_odds_second = odds_second(true_odds))
-# 
-# all_events2 <- all_events1 %>%
-#   group_by(event) %>%
-#   summarize(true_odds_second = mean(true_odds))
-# 
-# all_events2 <- all_events1 %>%
-#   group_by(event)
-# lapply(group_by(all_events1$true_odds, event), mean)
+#new_df <- readRDS("C:/Users/Ben/Desktop/R Projects/olympics/all_events_2018.rds")
