@@ -1,8 +1,11 @@
+#libraries
 library(rvest)
 library(dplyr)
 library(tidyr)
 library(stringr)
-#library(selectr)
+
+#read in events list
+all_events_list <- readRDS("C:/Users/Ben/Desktop/R Projects/olympics/all_events_2018.rds")
 
 #global vars
 hilo_cols <- 2
@@ -142,6 +145,7 @@ all_events <- alpine %>%
 
 #Paf and Unibet and the same, so get rid of Paf
 all_events$Unibet <- NULL
+all_events$Expekt <- NULL #same for betclic and expekt
 
 #remove "Any Other" from $name
 all_events <- all_events %>%
@@ -181,6 +185,7 @@ all_events_new <- all_events1 %>%
 
 #remove unneeded df's
 rm(alpine, biathlon, cross_country, hockey, ski_jumping)
+rm(all_events_new)
 #rm(all_events2)
 #
 #find odds of second place
@@ -208,49 +213,6 @@ odds_second <- function(x) {
 
 #apply to each event
 n_events <- levels(factor(all_events1$event))
-
-# downhill_m <- all_events1 %>% filter(event == "Downhill men")
-# true_odds_sec <- odds_second(downhill_m$true_odds)
-# downhill_m <- cbind(downhill_m, true_odds_sec)
-# 
-# downhill_w <- all_events1 %>% filter(event == "Downhill women")
-# true_odds_sec <- odds_second(downhill_w$true_odds)
-# downhill_w <- cbind(downhill_w, true_odds_sec)
-# 
-# gslalom_m <- all_events1 %>% filter(event == "Giant slalom men")
-# true_odds_sec <- odds_second(downhill_w$true_odds)
-# downhill_w <- cbind(downhill_w, true_odds_sec)
-# 
-# gslalom_w <- all_events1 %>% filter(event == "Giant slalom women")
-# hockey_m <- all_events1 %>% filter(event == "Men")
-# ten_km_sprint_m <- all_events1 %>% filter(event == "Men's 10 km sprint")
-# twelve_km_pursuit_m <- all_events1 %>% filter(event == "Men's 12.5 km pursuit")
-# fifteen_km_free_m <- all_events1 %>% filter(event == "Men's 15 km freestyle")
-# fifteen_km_mass_m <- all_events1 %>% filter(event == "Men's 15 km mass start")
-# twenty_km_ind_m <- all_events1 %>% filter(event == "Men's 20 km individual")
-# fourxten_mixrelay_m <- all_events1 %>% filter(event == "Men's 4x10 mix relay")
-# fifty_km_m <- all_events1 %>% filter(event == "Men's 50 km")
-# normal_hill_m <- all_events1 %>% filter(event == "Men's normal hill")
-# bi_relay_m <- all_events1 %>% filter(event == "Men's relay")
-# skiathlon_m <- all_events1 %>% filter(event == "Men's skiathlon ")
-# sprint_classic_m <- all_events1 %>% filter(event == "Men's sprint classic")
-# sprint_relay_m <- all_events1 %>% filter(event == "Men's sprint relay ")
-# mixed_relay <- all_events1 %>% filter(event == "Mixed relay")
-# slalom_m <- all_events1 %>% filter(event == "Slalom men")
-# slalom_w <- all_events1 %>% filter(event == "Slalom women")
-# superg_m <- all_events1 %>% filter(event == "Super-G men")
-# superg_w <- all_events1 %>% filter(event == "Super-G women")
-# ten_km_free_w <- all_events1 %>% filter(event == "Women's 10 km freestyle")
-# ten_km_pursuit_w <- all_events1 %>% filter(event == "Women's 10 km pursuit")
-# twelve_km_mass_w <- all_events1 %>% filter(event == "Women's 12.5 km mass start")
-# fifteen_km_ind_w <- all_events1 %>% filter(event == "Women's 15 km individual")
-# thirty_km_classical_w <- all_events1 %>% filter(event == "Women's 30 km classical")
-# fourxfive_mixrelay_w <- all_events1 %>% filter(event == "Women's 4x5 mix relay")
-# seven_km_sprint_w <- all_events1 %>% filter(event == "Women's 7.5 km sprint")
-# bi_relay_w <- all_events1 %>% filter(event == "Women's relay")
-# skiathlon_w <- all_events1 %>% filter(event == "Women's skiathlon ")
-# sprint_classic_w <- all_events1 %>% filter(event == "Women's sprint classic" )
-# sprint_relay_w <- all_events1 %>% filter(event == "Women's sprint relay")
 #
 df1 <- all_events1 %>% filter(event == "Downhill men")
 df2 <- all_events1 %>% filter(event == "Downhill women")
