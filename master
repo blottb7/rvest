@@ -150,6 +150,31 @@ all_events$Expekt <- NULL #same for betclic and expekt
 #remove "Any Other" from $name
 all_events <- all_events %>%
   filter(!grepl("Any Other", name))
+all_events <- all_events %>%
+  filter(!grepl("Odds Coming Soon", name))
+
+#convert all "Oar" and "Russia" name variations to something the same
+all_events$name <- gsub(".*Oar.*", "Russia", all_events$name)
+all_events$name <- gsub(".*Russia.*", "Russia", all_events$name)
+
+#something like this needs to be done around here:
+# copy <- all_events %>%
+#   group_by(event, name) %>%
+#   summarize(new_var = sum(Betclic, Paf, Williamhill, Betway, Bet365, Bwin, Titanbet, Winner, na.rm = TRUE))
+copy <- all_events %>%
+  group_by(event, name) %>%
+  summarize(new_var = mean(c(Betclic, Paf, Williamhill, Betway, Bet365, Bwin, Titanbet, Winner), na.rm = TRUE))
+copy <- all_events %>%
+  group_by(sport, event, name) %>%
+  summarize(new_var = mean(c(Betclic, Paf, Williamhill, Betway, Bet365, Bwin, Titanbet, Winner), na.rm = TRUE))
+#
+
+all_events_new <- all_events %>%
+  right_join(copy, by = c("event", "name"))
+all_events_new <- copy %>%
+  left_join(all_events, by = c("event", "name"))
+#copy <- all_events %>% group_by(event, name) %>% summarize(new_var = mean(true_odds))
+#all_events2 <- all_events1 %>% group_by(event, name) %>% summarize(new_var = mean(true_odds))
 
 #to do:
 #1) combine by same name in same event
@@ -322,12 +347,6 @@ event_fn <- function(df, var, n_events = n_events) {
   
 }
 
-# slalom <- all_events1 %>% filter(event == "Slalom men")
-# #odds_second(slalom$true_odds)
-# #slalom$true_odds_second <- odds_second(slalom$true_odds)
-# true_odds_sec <- odds_second(slalom$true_odds)
-# # #new_df <- cbind(slalom, true_odds_sec)
-# slalom <- cbind(slalom, true_odds_sec)
 # # #
 # 
 # #create a list of data frames by event
