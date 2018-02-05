@@ -128,20 +128,20 @@ hockey <- do.call(bind_rows, hockey)
 hockey$sport <- "hockey"
 
 #ski jumping
-urls <- as.list(c('http://www.nicerodds.co.uk/olympics-ski-jumping-mens-normal-hill'),
-                'http://www.nicerodds.co.uk/olympics-ski-jumping-mens-large-hill',
-                'http://www.nicerodds.co.uk/olympics-ski-jumping-mens-large-hill-team',
-                'http://www.nicerodds.co.uk/olympics-ski-jumping-womens-normal-hill')
-
-ski_jumping <- lapply(urls, nicerodds_scraper)
-ski_jumping <- do.call(bind_rows, ski_jumping)
-ski_jumping$sport <- "ski_jumping"
+# urls <- as.list(c('http://www.nicerodds.co.uk/olympics-ski-jumping-mens-normal-hill'),
+#                 'http://www.nicerodds.co.uk/olympics-ski-jumping-mens-large-hill',
+#                 'http://www.nicerodds.co.uk/olympics-ski-jumping-mens-large-hill-team',
+#                 'http://www.nicerodds.co.uk/olympics-ski-jumping-womens-normal-hill')
+# 
+# ski_jumping <- lapply(urls, nicerodds_scraper)
+# ski_jumping <- do.call(bind_rows, ski_jumping)
+# ski_jumping$sport <- "ski_jumping"
 
 all_events <- alpine %>%
   bind_rows(biathlon) %>%
   bind_rows(cross_country) %>%
-  bind_rows(hockey) %>%
-  bind_rows(ski_jumping)
+  bind_rows(hockey) #%>%
+  #bind_rows(ski_jumping)
 
 #Paf and Unibet and the same, so get rid of Paf
 all_events$Unibet <- NULL
@@ -229,7 +229,6 @@ odds_second <- function(x) {
   #print(Matrix)
 }
 
-
 #create event_list counter for each sport-event pair
 event_list <- unique(all_events1$sport_event)
 
@@ -249,154 +248,68 @@ for(i in seq_along(event_list)) {
 all_events1 <- bind_cols(all_events1, empty_df)
 colnames(all_events1)[8] <- "true_odds_second"
 
-# n_events <- levels(factor(all_events1$event))
-# #
-# df1 <- all_events1 %>% filter(event == "Downhill men")
-# df2 <- all_events1 %>% filter(event == "Downhill women")
-# df3 <- all_events1 %>% filter(event == "Giant slalom men")
-# df4 <- all_events1 %>% filter(event == "Giant slalom women")
-# df5 <- all_events1 %>% filter(event == "Men")
-# df6 <- all_events1 %>% filter(event == "Men's 10 km sprint")
-# df7 <- all_events1 %>% filter(event == "Men's 12.5 km pursuit")
-# df8 <- all_events1 %>% filter(event == "Men's 15 km freestyle")
-# df9 <- all_events1 %>% filter(event == "Men's 15 km mass start")
-# df10 <- all_events1 %>% filter(event == "Men's 20 km individual")
-# df11 <- all_events1 %>% filter(event == "Men's 4x10 mix relay")
-# df12 <- all_events1 %>% filter(event == "Men's 50 km")
-# df13 <- all_events1 %>% filter(event == "Men's normal hill")
-# df14 <- all_events1 %>% filter(event == "Men's relay")
-# df15 <- all_events1 %>% filter(event == "Men's skiathlon ")
-# df16 <- all_events1 %>% filter(event == "Men's sprint classic")
-# df17 <- all_events1 %>% filter(event == "Men's sprint relay ")
-# df18 <- all_events1 %>% filter(event == "Mixed relay")
-# df19 <- all_events1 %>% filter(event == "Slalom men")
-# df20 <- all_events1 %>% filter(event == "Slalom women")
-# df21 <- all_events1 %>% filter(event == "Super-G men")
-# df22 <- all_events1 %>% filter(event == "Super-G women")
-# df23 <- all_events1 %>% filter(event == "Women's 10 km freestyle")
-# df24 <- all_events1 %>% filter(event == "Women's 10 km pursuit")
-# df25 <- all_events1 %>% filter(event == "Women's 12.5 km mass start")
-# df26 <- all_events1 %>% filter(event == "Women's 15 km individual")
-# df27 <- all_events1 %>% filter(event == "Women's 30 km classical")
-# df28 <- all_events1 %>% filter(event == "Women's 4x5 mix relay")
-# df29 <- all_events1 %>% filter(event == "Women's 7.5 km sprint")
-# df30 <- all_events1 %>% filter(event == "Women's relay")
-# df31 <- all_events1 %>% filter(event == "Women's skiathlon ")
-# df32 <- all_events1 %>% filter(event == "Women's sprint classic" )
-# df33 <- all_events1 %>% filter(event == "Women's sprint relay")
-# 
-# true_odds_sec <- as.data.frame(odds_second(df1$true_odds))
-# df1 <- bind_cols(df1, true_odds_sec)
-# true_odds_sec <- odds_second(df2$true_odds)
-# df2 <- cbind(df2, true_odds_sec)
-# true_odds_sec <- odds_second(df3$true_odds)
-# df3 <- cbind(df3, true_odds_sec)
-# true_odds_sec <- odds_second(df4$true_odds)
-# df4 <- cbind(df4, true_odds_sec)
-# true_odds_sec <- odds_second(df5$true_odds)
-# df5 <- cbind(df5, true_odds_sec)
-# true_odds_sec <- odds_second(df6$true_odds)
-# df6 <- cbind(df6, true_odds_sec)
-# true_odds_sec <- odds_second(df7$true_odds)
-# df7 <- cbind(df7, true_odds_sec)
-# true_odds_sec <- odds_second(df8$true_odds)
-# df8 <- cbind(df8, true_odds_sec)
-# true_odds_sec <- odds_second(df9$true_odds)
-# df9 <- cbind(df9, true_odds_sec)
-# true_odds_sec <- odds_second(df10$true_odds)
-# df10 <- cbind(df10, true_odds_sec)
-# true_odds_sec <- odds_second(df11$true_odds)
-# df11 <- cbind(df11, true_odds_sec)
-# true_odds_sec <- odds_second(df12$true_odds)
-# df12 <- cbind(df12, true_odds_sec)
-# true_odds_sec <- odds_second(df13$true_odds)
-# df13 <- cbind(df13, true_odds_sec)
-# true_odds_sec <- odds_second(df14$true_odds)
-# df14 <- cbind(df14, true_odds_sec)
-# true_odds_sec <- odds_second(df15$true_odds)
-# df15 <- cbind(df15, true_odds_sec)
-# true_odds_sec <- odds_second(df16$true_odds)
-# df16 <- cbind(df16, true_odds_sec)
-# true_odds_sec <- odds_second(df17$true_odds)
-# df17 <- cbind(df17, true_odds_sec)
-# true_odds_sec <- odds_second(df18$true_odds)
-# df18 <- cbind(df18, true_odds_sec)
-# true_odds_sec <- odds_second(df19$true_odds)
-# df19 <- cbind(df19, true_odds_sec)
-# true_odds_sec <- odds_second(df20$true_odds)
-# df20 <- cbind(df20, true_odds_sec)
-# true_odds_sec <- odds_second(df21$true_odds)
-# df21 <- cbind(df21, true_odds_sec)
-# true_odds_sec <- odds_second(df22$true_odds)
-# df22 <- cbind(df22, true_odds_sec)
-# true_odds_sec <- odds_second(df23$true_odds)
-# df23 <- cbind(df23, true_odds_sec)
-# true_odds_sec <- odds_second(df24$true_odds)
-# df24 <- cbind(df24, true_odds_sec)
-# true_odds_sec <- odds_second(df25$true_odds)
-# df25 <- cbind(df25, true_odds_sec)
-# true_odds_sec <- odds_second(df26$true_odds)
-# df26 <- cbind(df26, true_odds_sec)
-# true_odds_sec <- odds_second(df27$true_odds)
-# df27 <- cbind(df27, true_odds_sec)
-# true_odds_sec <- odds_second(df28$true_odds)
-# df28 <- cbind(df28, true_odds_sec)
-# true_odds_sec <- odds_second(df29$true_odds)
-# df29 <- cbind(df29, true_odds_sec)
-# true_odds_sec <- odds_second(df30$true_odds)
-# df30 <- cbind(df30, true_odds_sec)
-# true_odds_sec <- odds_second(df31$true_odds)
-# df31 <- cbind(df31, true_odds_sec)
-# true_odds_sec <- odds_second(df32$true_odds)
-# df32 <- cbind(df32, true_odds_sec)
-# true_odds_sec <- odds_second(df33$true_odds)
-# df33 <- cbind(df33, true_odds_sec)
+#read in bovada info
+library(readxl)  #libraries
+bv <- read_excel("C:/Users/Ben/Desktop/R Projects/olympics/olympics_odds_2018.xlsx")  #read in data
 
-# #keep this on hold for now but keep working on it
-# event_list <- unique(c(all_events1$sport, all_events1$event))[1]
-# for(i in seq_along(event_list)) {
-#   new_df <- odds_second(all_events1$true_odds)
-#   print(new_df)
-# }
-# #
-# event_fn <- function(df, var, n_events = n_events) {
-#   
-#   for(i in seq_along(n_events)) {
-#     filter(df, var == n_events[1])
-#   }
-#   
-# }
+#equation for implied odds from money line odds
+bv$implied_odds <- ifelse(bv$line_odds < 0,
+                          -bv$line_odds / (-bv$line_odds + 100),
+                          100 / (bv$line_odds + 100) )
 
-# # #
-# 
-# #create a list of data frames by event
-# # df[1] <- all_events1 %>% 
-# #   filter(levels(factor(event))[1])
-# 
-# n_events <- levels(factor(all_events1$event))
-# 
-# df <- as.data.frame()
-# for(i in seq_along(n_events)) {
-#   #df[i] <- filter(all_events1, event == n_events[i])
-#   df[i] <- all_events1 %>%
-#     filter(event == n_events[i])
-#   #print(df[i])
-#   #df[i]
-#   df[i]
-# }
-# 
-# #####
-# all_events1 %>% group_by(event) %>% summarise(odds_second(true_odds))
-# all_events1 %>% group_by(event) %>% summarise_each(odds_second(true_odds))
-# #
-# all_events2 <- all_events1 %>%
-#   group_by(event) %>%
-#   summarize(true_odds_second = odds_second(true_odds))
-# 
-# all_events2 <- all_events1 %>%
-#   group_by(event) %>%
-#   summarize(true_odds_second = mean(true_odds))
-# 
-# all_events2 <- all_events1 %>%
-#   group_by(event)
-# lapply(group_by(all_events1$true_odds, event), mean)
+#get implied odds total for each sport event group
+bv1 <- bv %>%
+  group_by(sport, event) %>%
+  summarize(event_odds_tot = sum(implied_odds))
+#join event odds total with rest of df and calculate true odds
+bv <- bv %>%
+  left_join(bv1, by = c("sport", "event")) %>%
+  mutate(true_odds = implied_odds / event_odds_tot)
+# #checks to make sure true odds add to 1 for each event
+# bv_new <- bv %>%
+#   group_by(sport, event) %>%
+#   summarize(event_true_odds_tot = sum(true_odds))
+# rm(bv_new)
+
+#remove line odds
+bv$line_odds <- NULL
+
+#make sport-event var (this could be done earlier)
+bv$sport_event <- paste(bv$sport, bv$event, sep = " ")
+
+#create event_list counter for each sport-event pair
+event_list <- unique(bv$sport_event)
+
+#create for loop that runs odds_second on each sport-event group
+empty_df <- data.frame() #create empty data frame
+
+for(i in seq_along(event_list)) {
+  #run odds second on each sport event group
+  new_df <- as.data.frame(odds_second(bv$true_odds[which(bv$sport_event == event_list[i])]))
+  #print(new_df)
+  #bind the rows of each iteration into a df object
+  empty_df <- bind_rows(empty_df, new_df)
+  
+}
+
+#bind second place odds into dataframe
+bv <- bind_cols(bv, empty_df)
+colnames(bv)[8] <- "true_odds_second"
+
+#combine
+df <- bind_rows(all_events1, bv)
+
+#Create fantasy points!
+df$points <- 5 * df$true_odds + 3 * df$true_odds_second
+
+#start looking for "duplicate" athletes
+df1 <- df %>%
+  arrange(name)
+df2 <- df %>%
+  arrange(desc(points))
+
+#separate out team events
+teams <- df %>%
+  filter(sport == "curling" | sport == "hockey")
+ind <- df %>%
+  anti_join(teams)
