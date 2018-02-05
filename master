@@ -16,28 +16,26 @@ bv_new <- bv %>%
   group_by(sport, event) %>%
   summarize(event_true_odds_tot = sum(true_odds))
 rm(bv_new)
-# #check for duplicate names or misspellings
-# bv_names <- bv %>% arrange(name)
-# #look at odds
-# bv_new <- bv %>% arrange(desc(true_odds))
 
-bv_new <- bv
-#lapply(bv$true_odds, odds_second)
-lapply(group_by(bv, sport, event)["true_odds"], odds_second)
+#remove line odds
+bv$line_odds <- NULL
 
-bv_new_list <- lapply(group_by(bv, sport, event)["true_odds"], odds_second)
-bv_new1 <- cbind(bv_new, bv_new_list)
+#make sport-event var
+bv$sport_event <- paste(bv$sport, bv$event, sep = " ")
 
-names(bv_new1)[8] <- "second_odds"
+#event_list <- unique(c(bv$sport, bv$event))
+event_list <- unique(bv$sport_event)
 
-bv_new2 <- bv_new1 %>%
-  group_by(sport, event) %>%
-  summarize(event_second_odds_tot = sum(second_odds))
-bv_new1 <- bv_new1 %>%
-  left_join(bv_new2, by = c("sport", "event")) %>%
-  mutate(true_odds_second = second_odds / event_second_odds_tot)
-#check seconds add to 1
-bv_check <- bv_new1 %>%
-  group_by(sport, event) %>%
-  summarize(event_true_odds_second_tot = sum(true_odds_second))
-rm(bv_check)
+empty_df <- data.frame() #create empty data frame
+#create for loop that runs odds_second on each sport-event group
+for(i in seq_along(event_list)) {
+  #run odds second on each sport event group
+  new_df <- as.data.frame(odds_second(bv$true_odds[which(bv$sport_event == event_list[i])]))
+  #print(new_df)
+  #bind the rows of each iteration into a df object
+  empty_df <- bind_rows(empty_df, new_df)
+  
+}
+
+bv_new <- bind_cols(bv, empty_df)
+new_df <- odds_second(bv$true_odds[which(bv$sport_event == event_list[1])])
