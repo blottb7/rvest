@@ -151,8 +151,6 @@ all_events$Expekt <- NULL #same for betclic and expekt
 all_events <- all_events %>%
   filter(!grepl("Any Other", name))
 
-#Look for other duplicate cols
-
 #to do:
 #1) combine by same name in same event
 #2) get rid of non-American symbols
