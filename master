@@ -394,6 +394,16 @@ relays$country <- sub("Usa", "USA", relays$country)
 relay_inds1 <- relay_inds %>%
   left_join(relays, by = c("sport_event", "country"))
 relay_inds2 <- relay_inds1 %>%
-  select(-country)
+  select(-country) #%>%
+  #select(sport, event, name, sport_event, true_odds, true_odds_second, points)
 
 #join relay participants with other individuals
+#ind1 <- merge(ind, relay_inds2)
+ind1 <- ind %>%
+  full_join(relay_inds2)
+
+ind2 <- ind1 %>%
+  group_by(name) %>%
+  summarize(total_points = sum(points)) %>%
+  arrange(desc(total_points))
+  
