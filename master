@@ -378,3 +378,22 @@ ind <- ind %>%
   arrange(sport_event, desc(points))
 
 #hard to tell who is in the mixed biathlon relay, so conservatively leaving them out
+#read in and assing points to relay participants
+relay_inds <- read_excel("C:/Users/Ben/Desktop/R Projects/olympics/olympics_odds_2018.xlsx", sheet = 3)  #read in data
+#change name to country for relays
+names(relays)[3] <- "country"
+#trim white space from sport-event in relays
+relays$sport_event <- str_trim(relays$sport_event)
+
+relays$country <- gsub("\\.", "", relays$country)  #remove periods in countries in relays
+relays$country <- gsub("women", "", relays$country)  #remove "women" from country names
+relays$country <- gsub("Women", "", relays$country)
+relays$country <- str_trim(relays$country)  #remove trailing white space
+relays$country <- sub("Usa", "USA", relays$country)
+
+relay_inds1 <- relay_inds %>%
+  left_join(relays, by = c("sport_event", "country"))
+relay_inds2 <- relay_inds1 %>%
+  select(-country)
+
+#join relay participants with other individuals
