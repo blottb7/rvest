@@ -3,9 +3,10 @@ library(rvest)
 library(dplyr)
 library(tidyr)
 library(stringr)
+library(readxl)
 
 #read in events list
-all_events_list <- readRDS("C:/Users/Ben/Desktop/R Projects/olympics/all_events_2018.rds")
+#all_events_list <- readRDS("C:/Users/Ben/Desktop/R Projects/olympics/all_events_2018.rds")
 
 #global vars
 hilo_cols <- 2
@@ -174,6 +175,50 @@ all_events$name <- gsub(".*Russia.*", "Russia", all_events$name)
 #   select(mean_odds)
 # all_events <- bind_cols(all_events, all_events_odds)
 # rm(all_events_odds)
+# a function to replace foreign characters
+replaceforeignchars <- function(x)
+{
+  require(gsubfn);
+  x <- gsub("š","s",x)
+  x <- gsub("œ","oe",x)
+  x <- gsub("ž","z",x)
+  x <- gsub("ß","ss",x)
+  x <- gsub("þ","y",x)
+  x <- gsub("à","a",x)
+  x <- gsub("á","a",x)
+  x <- gsub("â","a",x)
+  x <- gsub("ã","a",x)
+  x <- gsub("ä","a",x)
+  x <- gsub("å","a",x)
+  x <- gsub("æ","ae",x)
+  x <- gsub("ç","c",x)
+  x <- gsub("è","e",x)
+  x <- gsub("é","e",x)
+  x <- gsub("ê","e",x)
+  x <- gsub("ë","e",x)
+  x <- gsub("ì","i",x)
+  x <- gsub("í","i",x)
+  x <- gsub("î","i",x)
+  x <- gsub("ï","i",x)
+  x <- gsub("ð","d",x)
+  x <- gsub("ñ","n",x)
+  x <- gsub("ò","o",x)
+  x <- gsub("ó","o",x)
+  x <- gsub("ô","o",x)
+  x <- gsub("õ","o",x)
+  x <- gsub("ö","o",x)
+  x <- gsub("ø","oe",x)
+  x <- gsub("ù","u",x)
+  x <- gsub("ú","u",x)
+  x <- gsub("û","u",x)
+  x <- gsub("ü","u",x)
+  x <- gsub("ý","y",x)
+  x <- gsub("ÿ","y",x)
+  x <- gsub("ğ","g",x)
+  
+  return(x)
+}
+
 
 #group by sport event and name, and calc mean odds for each individual
 all_events1 <- all_events %>%
@@ -249,7 +294,6 @@ all_events1 <- bind_cols(all_events1, empty_df)
 colnames(all_events1)[8] <- "true_odds_second"
 
 #read in bovada info
-library(readxl)  #libraries
 bv <- read_excel("C:/Users/Ben/Desktop/R Projects/olympics/olympics_odds_2018.xlsx")  #read in data
 
 #equation for implied odds from money line odds
@@ -311,51 +355,10 @@ df$points <- 5 * df$true_odds + 3 * df$true_odds_second
 #remove out columns that are no longer needed
 df <- df %>% select(sport, event, name, sport_event, true_odds, true_odds_second, points)
 #get rid of foreign chars in athlete names
-# a function to replace foreign characters
-replaceforeignchars <- function(x)
-{
-  require(gsubfn);
-  x <- gsub("š","s",x)
-  x <- gsub("œ","oe",x)
-  x <- gsub("ž","z",x)
-  x <- gsub("ß","ss",x)
-  x <- gsub("þ","y",x)
-  x <- gsub("à","a",x)
-  x <- gsub("á","a",x)
-  x <- gsub("â","a",x)
-  x <- gsub("ã","a",x)
-  x <- gsub("ä","a",x)
-  x <- gsub("å","a",x)
-  x <- gsub("æ","ae",x)
-  x <- gsub("ç","c",x)
-  x <- gsub("è","e",x)
-  x <- gsub("é","e",x)
-  x <- gsub("ê","e",x)
-  x <- gsub("ë","e",x)
-  x <- gsub("ì","i",x)
-  x <- gsub("í","i",x)
-  x <- gsub("î","i",x)
-  x <- gsub("ï","i",x)
-  x <- gsub("ð","d",x)
-  x <- gsub("ñ","n",x)
-  x <- gsub("ò","o",x)
-  x <- gsub("ó","o",x)
-  x <- gsub("ô","o",x)
-  x <- gsub("õ","o",x)
-  x <- gsub("ö","o",x)
-  x <- gsub("ø","oe",x)
-  x <- gsub("ù","u",x)
-  x <- gsub("ú","u",x)
-  x <- gsub("û","u",x)
-  x <- gsub("ü","u",x)
-  x <- gsub("ý","y",x)
-  x <- gsub("ÿ","y",x)
-  x <- gsub("ğ","g",x)
-  
-  return(x)
-}
-
 df$name <- replaceforeignchars(df$name)
+#remove trailing white space in df$sport_event
+df$sport_event <- str_trim(df$sport_event)
+
 #separate out team events
 teams <- df %>%
   filter(sport == "curling" | sport == "hockey")
@@ -369,13 +372,17 @@ relay_list <- as.list(c("short_track 5000m_men_relay", "cross_country Men's 4x10
                 "cross_country Women's sprint relay", "biathlon Men's relay", "ski_jumping large_hill_men_team",
                 "nordic_combined large_hill_team", "cross_country Women's 4x5 mix relay", "speed_skating team_pursuit_men",
                 "biathlon Mixed relay", "luge team_relay", "short_track 3000m_women_relay", "speed_skating team_pursuit_women",
-                "cross_country Men's sprint relay "))
+                "cross_country Men's sprint relay"))
 
 relays <- ind[ind$sport_event %in% relay_list, ]  #subset by sport-events in relay_list
 relays <- relays %>% arrange(sport_event, desc(points))
 
 ind <- ind %>%
-  arrange(sport_event, desc(points))
+  arrange(name)
+
+#remove relays from individual events
+ind <- ind %>%
+  anti_join(relays)
 
 #hard to tell who is in the mixed biathlon relay, so conservatively leaving them out
 #read in and assing points to relay participants
@@ -402,8 +409,35 @@ relay_inds2 <- relay_inds1 %>%
 ind1 <- ind %>%
   full_join(relay_inds2)
 
+#group_by and summarize by name
 ind2 <- ind1 %>%
   group_by(name) %>%
   summarize(total_points = sum(points)) %>%
   arrange(desc(total_points))
-  
+
+ind3 <- ind2 %>%
+  arrange(name)
+# 
+# #rename mismatched names
+# ind1$name <- ifelse(ind1$name == "Alexandr Loguinov", "Alexandr Loginov", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Andersson, Ebba", "Ebba Andersson", ind$name)
+# ind1$name <- ifelse(ind1$name == "Daniel Richardsson", "Daniel Rikardsson", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Espen Anderson", "Espen Andersen", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Ingvild Flugstad Østberg", "Ingvild Flugstag Ostberg", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Iryna-Varvynetsmagdalena-Gwizdon", "Iryna Varvynets", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Jennie Öberg", "Jennie Oberg", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Kathrine Rolsted Harsem", "Kathrine Harsem", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Kettu Niskanen", "Kerttu Niskanen", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Laurence St-Germain", "Laurence St. Germain", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Maiken Casperson Falla", "Maiken Caspersen Falla", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Marie Dorin-Habert", "Marie Dorin Habert", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Marit Bjorgen", "Marit Bjoergen", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Mona-Lisa Nousiainen", "Mona-Liisa Nousiainen", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Olena Pidrushna", "Olena Pidhrushna", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Sebastian Toutant", "Sebastien Toutant", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Shaoang Lui", "Shaoang Liu", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Sjur Rothe", "Sjur Roethe", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Timofei Lapshin", "Timofey Lapshin", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Walker/Smith", "Walker/Snith", ind1$name)
+# ind1$name <- ifelse(ind1$name == "Žan Kranjec", "Zan Kranjec", ind1$name)
+
