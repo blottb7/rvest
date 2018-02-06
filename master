@@ -409,35 +409,57 @@ relay_inds2 <- relay_inds1 %>%
 ind1 <- ind %>%
   full_join(relay_inds2)
 
+#rename mismatched names
+ind1$name <- ifelse(ind1$name == "Alexandr Loguinov", "Alexandr Loginov", ind1$name)
+#ind1$name <- ifelse(ind1$name == "Andersson, Ebba", "Ebba Andersson", ind$name)
+ind1$name <- ifelse(ind1$name == "Daniel Richardsson", "Daniel Rikardsson", ind1$name)
+ind1$name <- ifelse(ind1$name == "Espen Anderson", "Espen Andersen", ind1$name)
+ind1$name <- ifelse(ind1$name == "Ingvild Flugstad Østberg", "Ingvild Flugstag Ostberg", ind1$name)
+ind1$name <- ifelse(ind1$name == "Iryna-Varvynetsmagdalena-Gwizdon", "Iryna Varvynets", ind1$name)
+ind1$name <- ifelse(ind1$name == "Jennie Öberg", "Jennie Oberg", ind1$name)
+ind1$name <- ifelse(ind1$name == "Kathrine Rolsted Harsem", "Kathrine Harsem", ind1$name)
+ind1$name <- ifelse(ind1$name == "Kettu Niskanen", "Kerttu Niskanen", ind1$name)
+ind1$name <- ifelse(ind1$name == "Laurence St-Germain", "Laurence St. Germain", ind1$name)
+ind1$name <- ifelse(ind1$name == "Maiken Casperson Falla", "Maiken Caspersen Falla", ind1$name)
+ind1$name <- ifelse(ind1$name == "Marie Dorin-Habert", "Marie Dorin Habert", ind1$name)
+ind1$name <- ifelse(ind1$name == "Marit Bjorgen", "Marit Bjoergen", ind1$name)
+ind1$name <- ifelse(ind1$name == "Mona-Lisa Nousiainen", "Mona-Liisa Nousiainen", ind1$name)
+ind1$name <- ifelse(ind1$name == "Olena Pidrushna", "Olena Pidhrushna", ind1$name)
+ind1$name <- ifelse(ind1$name == "Sebastian Toutant", "Sebastien Toutant", ind1$name)
+ind1$name <- ifelse(ind1$name == "Shaoang Lui", "Shaoang Liu", ind1$name)
+ind1$name <- ifelse(ind1$name == "Sjur Rothe", "Sjur Roethe", ind1$name)
+ind1$name <- ifelse(ind1$name == "Timofei Lapshin", "Timofey Lapshin", ind1$name)
+ind1$name <- ifelse(ind1$name == "Walker/Smith", "Walker/Snith", ind1$name)
+ind1$name <- ifelse(ind1$name == "Žan Kranjec", "Zan Kranjec", ind1$name)
+
 #group_by and summarize by name
 ind2 <- ind1 %>%
   group_by(name) %>%
   summarize(total_points = sum(points)) %>%
   arrange(desc(total_points))
 
+#join individual total_points with events
+# ind3 <- ind1 %>%
+#   select(name, sport)
 ind3 <- ind2 %>%
-  arrange(name)
-# 
-# #rename mismatched names
-# ind1$name <- ifelse(ind1$name == "Alexandr Loguinov", "Alexandr Loginov", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Andersson, Ebba", "Ebba Andersson", ind$name)
-# ind1$name <- ifelse(ind1$name == "Daniel Richardsson", "Daniel Rikardsson", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Espen Anderson", "Espen Andersen", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Ingvild Flugstad Østberg", "Ingvild Flugstag Ostberg", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Iryna-Varvynetsmagdalena-Gwizdon", "Iryna Varvynets", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Jennie Öberg", "Jennie Oberg", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Kathrine Rolsted Harsem", "Kathrine Harsem", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Kettu Niskanen", "Kerttu Niskanen", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Laurence St-Germain", "Laurence St. Germain", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Maiken Casperson Falla", "Maiken Caspersen Falla", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Marie Dorin-Habert", "Marie Dorin Habert", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Marit Bjorgen", "Marit Bjoergen", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Mona-Lisa Nousiainen", "Mona-Liisa Nousiainen", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Olena Pidrushna", "Olena Pidhrushna", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Sebastian Toutant", "Sebastien Toutant", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Shaoang Lui", "Shaoang Liu", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Sjur Rothe", "Sjur Roethe", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Timofei Lapshin", "Timofey Lapshin", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Walker/Smith", "Walker/Snith", ind1$name)
-# ind1$name <- ifelse(ind1$name == "Žan Kranjec", "Zan Kranjec", ind1$name)
+  right_join(ind1) %>%
+  select(name, total_points, sport)
+ind4 <- unique(ind3) %>%
+  arrange(desc(total_points))
+ind4$discipline <- ifelse(ind4$sport == "bobsleigh" | ind4$sport == "luge" | ind4$sport == "skeleton", "sleds",
+                          ifelse(ind4$sport == "freestyle" | ind4$sport == "snowboarding", "tricks",
+                          ifelse(ind4$sport == "nordic_combined" | ind4$sport == "ski_jumping", "jumping",
+                                 ifelse(ind4$sport == "short_track" | ind4$sport == "speed_skating", "skating", ind4$sport))))
+
+#
+n_teams <- 12
+#starting organizing by discipline
+alpine <- ind4 %>% filter(discipline == "alpine")
+alpine <- alpine[1:(2*n_teams),]
+#
+
+#check for duplicates
+# ind4 <- ind2 %>%
+#   arrange(name)
+
 
