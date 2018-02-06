@@ -303,13 +303,78 @@ df <- bind_rows(all_events1, bv)
 df$points <- 5 * df$true_odds + 3 * df$true_odds_second
 
 #start looking for "duplicate" athletes
-df1 <- df %>%
-  arrange(name)
-df2 <- df %>%
-  arrange(desc(points))
+# df1 <- df %>%
+#   arrange(name)
+# df2 <- df %>%
+#   arrange(desc(points))
 
+#remove out columns that are no longer needed
+df <- df %>% select(sport, event, name, sport_event, true_odds, true_odds_second, points)
+#get rid of foreign chars in athlete names
+# a function to replace foreign characters
+replaceforeignchars <- function(x)
+{
+  require(gsubfn);
+  x <- gsub("š","s",x)
+  x <- gsub("œ","oe",x)
+  x <- gsub("ž","z",x)
+  x <- gsub("ß","ss",x)
+  x <- gsub("þ","y",x)
+  x <- gsub("à","a",x)
+  x <- gsub("á","a",x)
+  x <- gsub("â","a",x)
+  x <- gsub("ã","a",x)
+  x <- gsub("ä","a",x)
+  x <- gsub("å","a",x)
+  x <- gsub("æ","ae",x)
+  x <- gsub("ç","c",x)
+  x <- gsub("è","e",x)
+  x <- gsub("é","e",x)
+  x <- gsub("ê","e",x)
+  x <- gsub("ë","e",x)
+  x <- gsub("ì","i",x)
+  x <- gsub("í","i",x)
+  x <- gsub("î","i",x)
+  x <- gsub("ï","i",x)
+  x <- gsub("ð","d",x)
+  x <- gsub("ñ","n",x)
+  x <- gsub("ò","o",x)
+  x <- gsub("ó","o",x)
+  x <- gsub("ô","o",x)
+  x <- gsub("õ","o",x)
+  x <- gsub("ö","o",x)
+  x <- gsub("ø","oe",x)
+  x <- gsub("ù","u",x)
+  x <- gsub("ú","u",x)
+  x <- gsub("û","u",x)
+  x <- gsub("ü","u",x)
+  x <- gsub("ý","y",x)
+  x <- gsub("ÿ","y",x)
+  x <- gsub("ğ","g",x)
+  
+  return(x)
+}
+
+df$name <- replaceforeignchars(df$name)
 #separate out team events
 teams <- df %>%
   filter(sport == "curling" | sport == "hockey")
 ind <- df %>%
   anti_join(teams)
+
+# event_list <- unique(ind$sport_event)
+
+#Create list of relay/small team events
+relay_list <- as.list(c("short_track 5000m_men_relay", "cross_country Men's 4x10 mix relay", "biathlon Women's relay",
+                "cross_country Women's sprint relay", "biathlon Men's relay", "ski_jumping large_hill_men_team",
+                "nordic_combined large_hill_team", "cross_country Women's 4x5 mix relay", "speed_skating team_pursuit_men",
+                "biathlon Mixed relay", "luge team_relay", "short_track 3000m_women_relay", "speed_skating team_pursuit_women",
+                "cross_country Men's sprint relay "))
+
+relays <- ind[ind$sport_event %in% relay_list, ]  #subset by sport-events in relay_list
+relays <- relays %>% arrange(sport_event, desc(points))
+
+ind <- ind %>%
+  arrange(sport_event, desc(points))
+
+#hard to tell who is in the mixed biathlon relay, so conservatively leaving them out
