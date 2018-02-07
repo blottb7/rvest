@@ -446,20 +446,101 @@ ind3 <- ind2 %>%
   select(name, total_points, sport)
 ind4 <- unique(ind3) %>%
   arrange(desc(total_points))
-ind4$discipline <- ifelse(ind4$sport == "bobsleigh" | ind4$sport == "luge" | ind4$sport == "skeleton", "sleds",
-                          ifelse(ind4$sport == "freestyle" | ind4$sport == "snowboarding", "tricks",
-                          ifelse(ind4$sport == "nordic_combined" | ind4$sport == "ski_jumping", "jumping",
-                                 ifelse(ind4$sport == "short_track" | ind4$sport == "speed_skating", "skating", ind4$sport))))
+#remove the "extra" Jorien ter mors
+  #check the row number every time on this
+  #because she is in two separate sports, she escaped the unique() function
+ind4 <- ind4[-102,]
+
+#combine individuals with teams
+#concatenate teams and event into one col
+copy <- teams
+teams1 <- unite(teams, name, c(name, event), sep = " ")
+teams1 <- teams1 %>% select(name, total_points = points, sport, sport_event)
+teams1$sport <- NULL
+colnames(teams1)[3] <- "sport"
+# teams1 <- teams %>%
+#   select(name, points, sport_event, sport, event)
+# names(teams1) <- c("name", "total_points", "sport", "discard1", "discard2")
+# teams1 <- teams1[,1:3]
+
+#combine teams with individuals
+oly <- ind4 %>%
+  bind_rows(teams1) %>%
+  arrange(desc(total_points))
+#
+oly$discipline <- ifelse(oly$sport == "bobsleigh" | oly$sport == "luge" | oly$sport == "skeleton", "sleds",
+                         ifelse(oly$sport == "freestyle_skiing" | oly$sport == "snowboarding", "free_and_boards",
+                                ifelse(oly$sport == "nordic_combined" | oly$sport == "ski_jumping", "jumping",
+                                       ifelse(oly$sport == "short_track" | oly$sport == "speed_skating", "skating",
+                                              ifelse(str_detect(oly$sport, "hockey"), "hockey",
+                                                     ifelse(str_detect(oly$sport, "curling"), "curling", oly$sport))))))
 
 #
 n_teams <- 12
 #starting organizing by discipline
-alpine <- ind4 %>% filter(discipline == "alpine")
+alpine <- oly %>% filter(discipline == "alpine")
 alpine <- alpine[1:(2*n_teams),]
-#
+biathlon <- oly %>% filter(discipline == "biathlon")
+biathlon <- biathlon[1:(2*n_teams),]
+cross_country <- oly %>% filter(discipline == "cross_country")
+cross_country <- cross_country[1:(2*n_teams),]
+curling <- oly %>% filter(discipline == "curling")
+curling <- curling[1:(n_teams),]
+figure_skating <- oly %>% filter(discipline == "figure_skating")
+figure_skating <- figure_skating[1:(n_teams),]
+free_and_boards <- oly %>% filter(discipline == "free_and_boards")
+free_and_boards <- free_and_boards[1:(2*n_teams),]
+hockey <- oly %>% filter(discipline == "hockey")
+hockey <- hockey[1:(n_teams),]
+jumping <- oly %>% filter(discipline == "jumping")
+jumping <- jumping[1:(n_teams),]
+skating <- oly %>% filter(discipline == "skating")
+skating <- skating[1:(2*n_teams),]
+sleds <- oly %>% filter(discipline == "sleds")
+sleds <- sleds[1:(n_teams),]
 
-#check for duplicates
-# ind4 <- ind2 %>%
-#   arrange(name)
+#look for remaining athletes
+oly1 <- oly %>%
+  anti_join(alpine) %>%
+  anti_join(biathlon) %>%
+  anti_join(cross_country) %>%
+  anti_join(curling) %>%
+  anti_join(figure_skating) %>%
+  anti_join(free_and_boards) %>%
+  anti_join(hockey) %>%
+  anti_join(jumping) %>%
+  anti_join(skating) %>%
+  anti_join(sleds) %>%
+  arrange(desc(total_points))
+#subset for wild card athletes
+wc <- oly1[1:n_teams,]
 
+#bind rows together
+oly2 <- alpine %>%
+  bind_rows(biathlon) %>%
+  bind_rows(cross_country) %>%
+  bind_rows(curling) %>%
+  bind_rows(figure_skating) %>%
+  bind_rows(free_and_boards) %>%
+  bind_rows(hockey) %>%
+  bind_rows(jumping) %>%
+  bind_rows(skating) %>%
+  bind_rows(sleds) %>%
+  bind_rows(wc)
 
+#group_by discipline and find mean points
+oly3 <- oly2 %>%
+  group_by(discipline) %>%
+  summarize(disc_mean = mean(total_points))
+#calculate score from mean of each athlete
+oly4 <- oly2 %>%
+  left_join(oly3) %>%
+  arrange(desc(total_points))
+oly4$total_points <- round(oly4$total_points, 2)
+oly4$disc_mean <- round(oly4$disc_mean, 2)
+
+oly5 <- oly4 %>%
+  mutate(disc_points = total_points - disc_mean) %>%
+  arrange(desc(disc_points))
+
+#write.csv(oly4, "C:/Users/Ben/Desktop/R Projects/olympics/olympics_odds_final.csv")
