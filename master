@@ -157,24 +157,7 @@ all_events <- all_events %>%
 #convert all "Oar" and "Russia" name variations to something the same
 all_events$name <- gsub(".*Oar.*", "Russia", all_events$name)
 all_events$name <- gsub(".*Russia.*", "Russia", all_events$name)
-#group by sport event and name, and calc mean odds for each individual
-# copy <- all_events %>%
-#   group_by(sport, event, name) %>%
-#   summarize(mean_odds = mean(c(Betclic, Paf, Williamhill, Betway, Bet365, Bwin, Titanbet, Winner), na.rm = TRUE))
 
-#to do:
-#1) combine by same name in same event
-#2) get rid of non-American symbols
-
-# all_events_odds <- all_events %>%
-#   select(-name, -Highestodds, -Lowestodds, -event, -sport)
-# 
-# all_events_odds$mean_odds <- rowMeans(all_events_odds, na.rm = TRUE)
-# 
-# all_events_odds <- all_events_odds %>%
-#   select(mean_odds)
-# all_events <- bind_cols(all_events, all_events_odds)
-# rm(all_events_odds)
 # a function to replace foreign characters
 replaceforeignchars <- function(x)
 {
@@ -220,6 +203,7 @@ replaceforeignchars <- function(x)
 }
 
 #write.csv(all_events, "C:/Users/Ben/Desktop/R Projects/olympics/nicerodds_2018_0209.csv")
+all_events <- read.csv("C:/Users/Ben/Desktop/R Projects/olympics/nicerodds_2018_0209.csv")
 #group by sport event and name, and calc mean odds for each individual
 all_events1 <- all_events %>%
   group_by(sport, event, name) %>%
@@ -346,18 +330,15 @@ df <- bind_rows(all_events1, bv)
 #Create fantasy points!
 df$points <- 5 * df$true_odds + 3 * df$true_odds_second
 
-#start looking for "duplicate" athletes
-# df1 <- df %>%
-#   arrange(name)
-# df2 <- df %>%
-#   arrange(desc(points))
-
-#remove out columns that are no longer needed
-df <- df %>% select(sport, event, name, sport_event, true_odds, true_odds_second, points)
 #get rid of foreign chars in athlete names
 df$name <- replaceforeignchars(df$name)
 #remove trailing white space in df$sport_event
 df$sport_event <- str_trim(df$sport_event)
+
+#write.csv
+write.csv(df, "C:/Users/Ben/Desktop/R Projects/olympics/event_odds.csv")
+#remove out columns that are no longer needed
+df <- df %>% select(sport, event, name, sport_event, true_odds, true_odds_second, points)
 
 #separate out team events
 teams <- df %>%
@@ -431,6 +412,9 @@ ind1$name <- ifelse(ind1$name == "Sjur Rothe", "Sjur Roethe", ind1$name)
 ind1$name <- ifelse(ind1$name == "Timofei Lapshin", "Timofey Lapshin", ind1$name)
 ind1$name <- ifelse(ind1$name == "Walker/Smith", "Walker/Snith", ind1$name)
 ind1$name <- ifelse(ind1$name == "Žan Kranjec", "Zan Kranjec", ind1$name)
+
+#write individual event odds in
+#write.csv(ind1, "C:/Users/Ben/Desktop/R Projects/olympics/event_odds_individuals_only.csv")
 
 #group_by and summarize by name
 ind2 <- ind1 %>%
