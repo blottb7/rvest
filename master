@@ -219,11 +219,11 @@ replaceforeignchars <- function(x)
   return(x)
 }
 
-
+#write.csv(all_events, "C:/Users/Ben/Desktop/R Projects/olympics/nicerodds_2018_0209.csv")
 #group by sport event and name, and calc mean odds for each individual
 all_events1 <- all_events %>%
   group_by(sport, event, name) %>%
-  summarize(mean_odds = mean(c(Betclic, Paf, Williamhill, Betway, Bet365, Bwin, Titanbet, Winner), na.rm = TRUE)) %>%
+  summarize(mean_odds = mean(c(Betclic, Paf, Betway, Bet365, Bwin, Titanbet, Winner), na.rm = TRUE)) %>%
   mutate(implied_odds = 1 / mean_odds)
   
 # all_events1 <- all_events %>%
@@ -449,11 +449,11 @@ ind4 <- unique(ind3) %>%
 #remove the "extra" Jorien ter mors
   #check the row number every time on this
   #because she is in two separate sports, she escaped the unique() function
-ind4 <- ind4[-102,]
+ind4 <- ind4[-107,]
 
 #combine individuals with teams
 #concatenate teams and event into one col
-copy <- teams
+# copy <- teams
 teams1 <- unite(teams, name, c(name, event), sep = " ")
 teams1 <- teams1 %>% select(name, total_points = points, sport, sport_event)
 teams1$sport <- NULL
@@ -475,6 +475,7 @@ oly$discipline <- ifelse(oly$sport == "bobsleigh" | oly$sport == "luge" | oly$sp
                                               ifelse(str_detect(oly$sport, "hockey"), "hockey",
                                                      ifelse(str_detect(oly$sport, "curling"), "curling", oly$sport))))))
 
+write.csv(oly, "C:/Users/Ben/Desktop/R Projects/olympics/projections_2018_0209.csv")
 #
 n_teams <- 12
 #starting organizing by discipline
